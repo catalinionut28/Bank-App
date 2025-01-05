@@ -1,5 +1,7 @@
 package org.poo.utils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 public final class Utils {
@@ -57,5 +59,28 @@ public final class Utils {
     public static void resetRandom() {
         ibanRandom = new Random(IBAN_SEED);
         cardRandom = new Random(CARD_SEED);
+    }
+
+    public static int calculateAge(String birthDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(birthDate, formatter);
+        LocalDate today = LocalDate.now();
+        int crtDay = today.getDayOfMonth();
+        int crtMonth = today.getMonthValue();
+        int crtYear = today.getYear();
+        int birthDay = date.getDayOfMonth();
+        int birthMonth = date.getMonthValue();
+        int birthYear = date.getYear();
+        if (crtMonth < birthMonth) {
+            return crtYear - birthYear - 1;
+        }
+        if (crtMonth == birthMonth) {
+            if (crtDay < birthDay) {
+                return crtYear - birthYear - 1;
+            } else {
+                return crtYear - birthYear;
+            }
+        }
+        return crtYear - birthYear;
     }
 }

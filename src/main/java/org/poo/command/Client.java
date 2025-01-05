@@ -19,7 +19,9 @@ public class Client {
     private ObjectMapper objectMapper;
     private ArrayNode output;
 
-    public Client(ObjectInput inputData, ObjectMapper objectMapper, ArrayNode output) {
+    public Client(final ObjectInput inputData,
+                  final ObjectMapper objectMapper,
+                  final ArrayNode output) {
         invoker = new Invoker();
         userDao = new DaoImpl();
         aliasMap = new HashMap<>();
@@ -34,7 +36,30 @@ public class Client {
         this.output = output;
     }
 
-    private Command getCommand(CommandType type, CommandInput commandInput) {
+
+    /**
+     * Factory method that generates the appropriate
+     * command based on the given {@link CommandType}.
+     * This method acts as a factory for creating
+     * specific command objects based on the type provided.
+     * It takes a {@link CommandType} and
+     * {@link CommandInput},
+     * retrieves the necessary data (such as
+     * user or account information),
+     * and returns an instance of the corresponding command.
+     * If the
+     * command type is unrecognized or there is an error,
+     * the method returns null.
+     *
+     * @param type The type of command to create (e.g., ADD_ACCOUNT, ADD_FUNDS, etc.).
+     * @param commandInput The input data needed to create the command.
+     * @return A {@link Command} object corresponding
+     * to the provided {@link CommandType}, or null if the
+     * command type is invalid or an
+     * error occurs during object creation.
+     */
+    private Command getCommand(final CommandType type,
+                               final CommandInput commandInput) {
         try {
             Command command;
             User user = null;
@@ -58,7 +83,9 @@ public class Client {
                 case CREATE_CARD:
                     user = (User) userDao.get(commandInput.getEmail());
                     account = (Account) user.getAccountDao().get(commandInput.getAccount());
-                    command = new CreateCard(user, account, commandInput.getTimestamp(), objectMapper, output);
+                    command = new CreateCard(user, account,
+                                            commandInput.getTimestamp(),
+                                            objectMapper, output);
                     return command;
                 case ADD_FUNDS:
                     for (DaoObject userData : userDao.getAll()) {
@@ -83,7 +110,6 @@ public class Client {
                     for (DaoObject accountData: user.getAccountDao().getAll()) {
                         Account acc = (Account) accountData;
                         for (Card card : acc.getCards()) {
-                            System.out.println(card.getCardNumber());
                             if (card.getCardNumber().equals(commandInput.getCardNumber())) {
                                 account = acc;
                             }
@@ -110,7 +136,7 @@ public class Client {
                         User usr = (User) userData;
                         for (DaoObject accountData: usr.getAccountDao().getAll()) {
                             Account acc = (Account) accountData;
-                            if (acc.getIBAN().equals(commandInput.getAccount())) {
+                            if (acc.getIban().equals(commandInput.getAccount())) {
                                 account = acc;
                             }
                         }
@@ -145,12 +171,14 @@ public class Client {
                     return command;
                 case SEND_MONEY:
                     User sender = (User) userDao.get(commandInput.getEmail());
-                    Account senderAcc = (Account) sender.getAccountDao().get(commandInput.getAccount());
+                    Account senderAcc = (Account) sender.getAccountDao()
+                                                        .get(commandInput.getAccount());
                     Account receiverAcc = aliasMap.get(commandInput.getReceiver());
                     if (receiverAcc == null) {
                         for (DaoObject userDaoObject : userDao.getAll()) {
                             User usr = (User) userDaoObject;
-                            receiverAcc = (Account) usr.getAccountDao().get(commandInput.getReceiver());
+                            receiverAcc = (Account) usr.getAccountDao()
+                                                        .get(commandInput.getReceiver());
                             if (receiverAcc != null) {
                                 break;
                             }
@@ -170,7 +198,7 @@ public class Client {
                         User usr = (User) usrData;
                         for (DaoObject accData: usr.getAccountDao().getAll()) {
                             Account acc = (Account) accData;
-                            if (acc.getIBAN().equals(commandInput.getAccount())) {
+                            if (acc.getIban().equals(commandInput.getAccount())) {
                                 account = acc;
                                 break;
                             }
@@ -211,10 +239,10 @@ public class Client {
                     return command;
                 case SPLIT_PAYMENT:
                     ArrayList<Account> accounts = new ArrayList<>();
-                    for (String IBAN: commandInput.getAccounts()) {
+                    for (String iban: commandInput.getAccounts()) {
                         for (DaoObject userData: userDao.getAll()) {
                             User usr = (User) userData;
-                            Account acc = (Account) usr.getAccountDao().get(IBAN);
+                            Account acc = (Account) usr.getAccountDao().get(iban);
                             if (acc != null) {
                                 account = acc;
                             }
@@ -247,6 +275,56 @@ public class Client {
                             objectMapper,
                             output);
                     return command;
+                case SPENDINGS_REPORT:
+                    for (DaoObject userData: userDao.getAll()) {
+                        User usr = (User) userData;
+                        Account acc = (Account) usr
+                                .getAccountDao()
+                                .get(commandInput.getAccount());
+                        if (acc != null) {
+                            account = acc;
+                        }
+                    }
+                    command = new SpendingsReport(account,
+                            commandInput.getStartTimestamp(),
+                            commandInput.getEndTimestamp(),
+                            commandInput.getTimestamp(),
+                            objectMapper,
+                            output);
+                    return command;
+                case ADD_INTEREST:
+                    for (DaoObject userData: userDao.getAll()) {
+                        User usr = (User) userData;
+                        Account acc = (Account) usr
+                                .getAccountDao()
+                                .get(commandInput.getAccount());
+                        if (acc != null) {
+                            account = acc;
+                        }
+                    }
+                    command = new AddInterest(account,
+                            commandInput.getTimestamp(),
+                            objectMapper,
+                            output);
+                    return command;
+                case CHANGE_INTEREST_RATE:
+                    for (DaoObject userData: userDao.getAll()) {
+                        User usr = (User) userData;
+                        Account acc = (Account) usr
+                                .getAccountDao()
+                                .get(commandInput.getAccount());
+                        if (acc != null) {
+                            account = acc;
+                        }
+                    }
+                    command = new ChangeInterestRate(account,
+                            commandInput.getInterestRate(),
+                            commandInput.getTimestamp(),
+                            objectMapper,
+                            output);
+                    return command;
+
+
                 default:
                     break;
             }
@@ -256,10 +334,25 @@ public class Client {
         return null;
     }
 
-    public void executeAction(String commandName,
-                              CommandInput commandInput) throws IllegalArgumentException {
+
+    /**
+     * Executes the action associated with the given command name and command input.
+     * This method is responsible for determining the appropriate command type from the provided
+     * command name, creating the corresponding
+     * {@link Command} object using the {@link CommandInput},
+     * and executing it through the provided
+     * {@link Invoker}.
+     * If the command is invalid or cannot be
+     * created, an {@link IllegalArgumentException} is thrown.
+     *
+     * @param commandName The name of the command to execute (as a string).
+     * @param commandInput The input data required to execute the command.
+     * @throws IllegalArgumentException
+     * If the command name is invalid or if the command cannot be created.
+     */
+    public void executeAction(final String commandName,
+                              final CommandInput commandInput) throws IllegalArgumentException {
         CommandType commandType = CommandType.fromString(commandName);
-        System.out.println(commandType);
         Command command = getCommand(commandType, commandInput);
         if (command == null) {
             throw new IllegalArgumentException("Invalid command!");

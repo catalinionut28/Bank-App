@@ -15,15 +15,24 @@ public enum CommandType {
     PRINT_TRANSACTIONS("printTransactions"),
     CHECK_CARD_STATUS("checkCardStatus"),
     SPLIT_PAYMENT("splitPayment"),
-    REPORT("report");
+    REPORT("report"),
+    SPENDINGS_REPORT("spendingsReport"),
+    ADD_INTEREST("addInterest"),
+    CHANGE_INTEREST_RATE("changeInterestRate");
 
-    public final String command;
+    private final String command;
 
-    CommandType(String command) {
+    CommandType(final String command) {
         this.command = command;
     }
 
-    public static CommandType fromString(String command) {
+    /**
+     * Converts a string command to its corresponding CommandType enum.
+     *
+     * @param command The string representation of the command.
+     * @return The corresponding CommandType, or {@code null} if no matching command is found.
+     */
+    public static CommandType fromString(final String command) {
         for (CommandType commandType: CommandType.values()) {
             if (commandType.command.equals(command)) {
                 return commandType;

@@ -2,12 +2,11 @@ package org.poo.bank;
 
 import org.poo.graph.CurrencyGraph;
 import org.poo.graph.Node;
-import org.poo.utils.Utils;
 
 import java.util.ArrayList;
 
 public abstract class Account implements DaoObject {
-    private String IBAN;
+    private String iban;
     private ArrayList<Card> cards;
     private double balance;
     private double minimumBalance;
@@ -16,88 +15,213 @@ public abstract class Account implements DaoObject {
     private ArrayList<Transaction> userTransactions;
     private ArrayList<Transaction> transactionHistory;
 
+    /**
+     * Retrieves the transaction history.
+     *
+     * @return an ArrayList of Transaction objects representing the transaction history.
+     */
+
     public ArrayList<Transaction> getTransactionHistory() {
         return transactionHistory;
     }
 
-    public void setTransactionHistory(ArrayList<Transaction> transactionHistory) {
+    /**
+     * Sets the transaction history.
+     *
+     * @param transactionHistory an ArrayList
+     *                           of Transaction objects
+     *                           representing the transaction history.
+     */
+
+    public void setTransactionHistory(final ArrayList<Transaction> transactionHistory) {
         this.transactionHistory = transactionHistory;
     }
+
+    /**
+     * Retrieves the list of cards associated with the account.
+     *
+     * @return an ArrayList of Card objects.
+     */
 
     public ArrayList<Card> getCards() {
         return cards;
     }
 
+    /**
+     * Retrieves the account balance.
+     *
+     * @return the current balance as a double.
+     */
+
     public double getBalance() {
         return balance;
     }
+
+    /**
+     * Retrieves the account currency.
+     *
+     * @return a String representing the currency type.
+     */
 
     public String getCurrency() {
         return currency;
     }
 
-    public String getIBAN() {
-        return IBAN;
+    /**
+     * Retrieves the IBAN of the account.
+     *
+     * @return a String representing the IBAN.
+     */
+
+    public String getIban() {
+        return iban;
     }
+
+    /**
+     * Retrieves the account type.
+     *
+     * @return a String representing the account type.
+     */
 
     public String getType() {
         return type;
     }
 
-    public void setBalance(double balance) {
+    /**
+     * Updates the account balance.
+     *
+     * @param balance the new balance as a double.
+     */
+
+    public void setBalance(final double balance) {
         this.balance = balance;
     }
 
-    public void setCards(ArrayList<Card> cards) {
+    /**
+     * Sets the list of cards associated with the account.
+     *
+     * @param cards an ArrayList of Card objects.
+     */
+
+    public void setCards(final ArrayList<Card> cards) {
         this.cards = cards;
     }
 
-    public void setCurrency(String currency) {
+    /**
+     * Sets the currency of the account.
+     *
+     * @param currency a String representing the currency.
+     */
+
+    public void setCurrency(final String currency) {
         this.currency = currency;
     }
 
-    public void setIBAN(String IBAN) {
-        this.IBAN = IBAN;
+    /**
+     * Sets the IBAN of the account.
+     *
+     * @param iban a String representing the IBAN.
+     */
+
+    public void setIban(final String iban) {
+        this.iban = iban;
     }
 
-    public void setType(String type) {
+    /**
+     * Sets the account type.
+     *
+     * @param type a String representing the account type.
+     */
+
+    public void setType(final String type) {
         this.type = type;
     }
 
-    public void setUserTransactions(ArrayList<Transaction> userTransactions) {
+    /**
+     * Sets the list of user transactions.
+     *
+     * @param userTransactions an ArrayList of Transaction objects.
+     */
+
+    public void setUserTransactions(final ArrayList<Transaction> userTransactions) {
         this.userTransactions = userTransactions;
     }
+
+    /**
+     * Retrieves the list of user transactions.
+     *
+     * @return an ArrayList of Transaction objects.
+     */
 
     public ArrayList<Transaction> getUserTransactions() {
         return userTransactions;
     }
 
-    public void addFunds(double amount) {
+    /**
+     * Adds funds to the account.
+     *
+     * @param amount the amount to be added as a double.
+     */
+
+    public void addFunds(final double amount) {
         balance += amount;
     }
+
+    /**
+     * Creates a new card and adds it to the list of cards.
+     */
 
     public void createCard() {
         Card card = new Card();
         cards.add(card);
     }
 
+    /**
+     * Retrieves the account identifier (IBAN).
+     *
+     * @return a String representing the IBAN.
+     */
+
     public String getIdentifier() {
-        return IBAN;
+        return iban;
     }
+
+    /**
+     * Creates a one-time use card and adds it to the list of cards.
+     */
 
     public void createOneTimeCard() {
         cards.add(new OneTimeCard());
     }
 
-    public void setMinimumBalance(double amount) {
+    /**
+     * Sets the minimum balance for the account.
+     *
+     * @param amount the minimum balance as a double.
+     */
+
+    public void setMinimumBalance(final double amount) {
         minimumBalance = amount;
     }
+
+    /**
+     * Retrieves the minimum balance of the account.
+     *
+     * @return the minimum balance as a double.
+     */
 
     public double getMinimumBalance() {
         return minimumBalance;
     }
 
-    public Card getCard(String cardNumber) {
+    /**
+     * Retrieves a card by its card number.
+     *
+     * @param cardNumber a String representing the card number.
+     * @return the corresponding Card object, or null if not found.
+     */
+
+    public Card getCard(final String cardNumber) {
         for (Card card: cards) {
             if (card.getCardNumber().equals(cardNumber)) {
                 return card;
@@ -106,29 +230,65 @@ public abstract class Account implements DaoObject {
         return null;
     }
 
-    public void payOnline(double amount) {
+    /**
+     * Makes an online payment using a specified card.
+     *
+     * @param amount the amount to be paid as a double.
+     * @param cardNumber a String representing the card number used for payment.
+     */
+
+    public void payOnline(final double amount, final String cardNumber) {
+        balance -= amount;
+        Card card = getCard(cardNumber);
+        if (card.isOneTimeCard()) {
+            cards.remove(card);
+            createOneTimeCard();
+        }
+    }
+
+    /**
+     * Splits a payment and deducts the specified amount from the account balance.
+     *
+     * @param amount the amount to be deducted as a double.
+     */
+
+    public void splitPay(final double amount) {
         balance -= amount;
     }
 
-    public void splitPay(double amount) {
-        balance -= amount;
-    }
+    /**
+     * Receives money and adds it to the account balance.
+     *
+     * @param amount the amount to be added as a double.
+     */
 
-    public void receiveMoney(double amount) {
+    public void receiveMoney(final double amount) {
         balance += amount;
     }
 
-    public void sendMoney(Account receiver, double amount,
-                          CurrencyGraph exchangeGraph,
-                          int timestamp,
-                          String description) {
+    /**
+     * Sends money to another account, processes the transaction,
+     * and records the transaction history.
+     *
+     * @param receiver the receiving Account object.
+     * @param amount the amount to be sent as a double.
+     * @param exchangeGraph the CurrencyGraph object for currency conversion.
+     * @param timestamp the transaction timestamp as an int.
+     * @param description a String describing the transaction.
+     */
+
+    public void sendMoney(final Account receiver,
+                          double amount,
+                          final CurrencyGraph exchangeGraph,
+                          final int timestamp,
+                          final String description) {
         this.balance -= amount;
         String formattedAmount = String.valueOf(amount)
                                 + " " + currency;
         SendReceive transaction = new SendReceive(timestamp,
                                                 description,
-                                                IBAN,
-                                                receiver.getIBAN(),
+                                                iban,
+                                                receiver.getIban(),
                                                 formattedAmount,
                                                 "sent");
         userTransactions.add(transaction);
@@ -141,8 +301,8 @@ public abstract class Account implements DaoObject {
             SendReceive receiveTransaction =
                     new SendReceive(timestamp,
                                     description,
-                                    IBAN,
-                                    receiver.getIBAN(),
+                                    iban,
+                                    receiver.getIban(),
                                     formattedAmount,
                             "received");
             receiver.getUserTransactions()
@@ -159,8 +319,8 @@ public abstract class Account implements DaoObject {
             SendReceive receiveTransaction =
                     new SendReceive(timestamp,
                             description,
-                            IBAN,
-                            receiver.getIBAN(),
+                            iban,
+                            receiver.getIban(),
                             formattedAmount,
                             "received");
             receiver.getUserTransactions()
@@ -173,31 +333,3 @@ public abstract class Account implements DaoObject {
 }
 
 
-class ClassicAccount extends Account {
-
-    public ClassicAccount(String currency,
-                          ArrayList<Transaction> transactions) {
-        this.setBalance(0);
-        this.setCards(new ArrayList<>());
-        this.setIBAN(Utils.generateIBAN());
-        this.setType("classic");
-        this.setCurrency(currency);
-        this.setUserTransactions(transactions);
-        this.setTransactionHistory(new ArrayList<Transaction>());
-    }
-}
-class SavingsAccount extends Account {
-    private double interestRate;
-
-    public SavingsAccount(String currency,
-                          ArrayList<Transaction> transactions) {
-        this.setBalance(0);
-        this.setCards(new ArrayList<>());
-        this.setIBAN(Utils.generateIBAN());
-        this.setType("savings");
-        this.setCurrency(currency);
-        this.setUserTransactions(transactions);
-        this.setTransactionHistory(new ArrayList<>());
-        this.interestRate = 0;
-    }
-}

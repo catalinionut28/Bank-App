@@ -12,23 +12,63 @@ public class CurrencyGraph {
         visited = new HashMap<>();
     }
 
+    /**
+     * Returns the map of currencies and their visited status during DFS.
+     *
+     * @return A {@link HashMap} where the key is the currency name,
+     * and the value is a {@code Boolean} indicating if the currency has been visited.
+     */
     public HashMap<String, Boolean> getVisited() {
         return visited;
     }
 
+    /**
+     * Returns the graph that represents currency exchange rates.
+     *
+     * @return A {@link HashMap} where the key is the currency name,
+     * and the value is a list of {@link Node} objects
+     * representing neighboring currencies and their exchange rates.
+     */
     public HashMap<String, ArrayList<Node>> getGraph() {
         return graph;
     }
 
-    public void setGraph(HashMap<String, ArrayList<Node>> graph) {
+    /**
+     * Sets the graph that represents currency exchange rates.
+     *
+     * @param graph A {@link HashMap} representing the graph,
+     *              where the key is the currency name,
+     *              and the value is a list of {@link Node} objects
+     *              representing neighboring currencies.
+     */
+    public void setGraph(final HashMap<String, ArrayList<Node>>
+                                 graph) {
         this.graph = graph;
     }
 
-    public void setVisited(HashMap<String, Boolean> visited) {
+    /**
+     * Sets the visited map, which tracks the currencies visited during DFS.
+     *
+     * @param visited A {@link HashMap} where the key is the currency name,
+     *                and the value is a {@code Boolean}
+     *                indicating if the currency has been visited.
+     */
+    public void setVisited(final HashMap<String, Boolean> visited) {
         this.visited = visited;
     }
 
-    public void addEdge(String curr1, String curr2, double rate) {
+    /**
+     * Adds an edge (exchange rate) between two currencies in the graph.
+     * Also adds the reverse rate for bidirectional exchange.
+     * Initializes the visited status for both currencies.
+     *
+     * @param curr1 The first currency.
+     * @param curr2 The second currency.
+     * @param rate  The exchange rate from {@code curr1} to {@code curr2}.
+     */
+    public void addEdge(final String curr1,
+                        final String curr2,
+                        final double rate) {
         try {
             double rateTwoToOne = 1 / rate;
             if (!graph.containsKey(curr1)) {
@@ -46,7 +86,20 @@ public class CurrencyGraph {
         }
     }
 
-    public double exchangeDFS(Node start, Node end, double amount) throws IllegalArgumentException {
+    /**
+     * Performs a DFS to find the exchange rate between two currencies.
+     * If no valid exchange path exists, returns -1.
+     *
+     * @param start The starting currency node.
+     * @param end   The target currency node.
+     * @param amount The amount to be converted.
+     * @return The converted amount if a path exists, otherwise -1.
+     * @throws IllegalArgumentException if the start currency
+     *  does not exist in the graph.
+     */
+    public double exchangeDFS(final Node start,
+                              final Node end,
+                              final double amount) throws IllegalArgumentException {
         if (!graph.containsKey(start.getCurrency())) {
             throw new IllegalArgumentException("The starting currency doesn't exist");
         }
@@ -57,7 +110,6 @@ public class CurrencyGraph {
                 idOfInterestCurrency = i;
             }
         }
-        System.out.println(idOfInterestCurrency);
         if (idOfInterestCurrency != -1) {
             return amount * graph
                             .get(start.getCurrency())
@@ -75,13 +127,29 @@ public class CurrencyGraph {
         return -1;
     }
 
+    /**
+     * Resets the visited status for all currencies in the graph to {@code false}.
+     */
     void resetVisited() {
         for (String currency: visited.keySet()) {
             visited.put(currency, false);
         }
     }
 
-    public double exchange(Node start, Node end, double amount) {
+    /**
+     * Initiates a currency exchange operation,
+     * using DFS to find a valid exchange path.
+     * If no valid path is found,
+     * an exception is thrown, and the method returns -1.
+     *
+     * @param start   The starting currency node.
+     * @param end     The target currency node.
+     * @param amount  The amount to be converted.
+     * @return The converted amount if a valid path is found, otherwise -1.
+     */
+    public double exchange(final Node start,
+                           final Node end,
+                           final double amount) {
         resetVisited();
         try {
             return exchangeDFS(start, end, amount);

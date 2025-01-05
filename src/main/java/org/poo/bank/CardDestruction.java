@@ -5,10 +5,10 @@ public class CardDestruction extends Transaction {
     private String cardHolder;
     private String account;
 
-    public CardDestruction(int timestamp,
-                           String card,
-                           String cardHolder,
-                           String account) {
+    public CardDestruction(final int timestamp,
+                           final String card,
+                           final String cardHolder,
+                           final String account) {
         this.setTimestamp(timestamp);
         this.setType("CardDestruction");
         this.setDescription("The card has been destroyed");
@@ -17,27 +17,63 @@ public class CardDestruction extends Transaction {
         this.account = account;
     }
 
+    /**
+     * Retrieves the associated account number.
+     *
+     * @return a String representing the account number.
+     */
+
     public String getAccount() {
         return account;
     }
+
+    /**
+     * Retrieves the email of the cardholder.
+     *
+     * @return a String representing the cardholder's email.
+     */
 
     public String getCardHolder() {
         return cardHolder;
     }
 
+    /**
+     * Retrieves the card number.
+     *
+     * @return a String representing the card number.
+     */
+
     public String getCard() {
         return card;
     }
 
-    public void setCard(String card) {
+    /**
+     * Sets the card number.
+     *
+     * @param card a String representing the card number.
+     */
+
+    public void setCard(final String card) {
         this.card = card;
     }
 
-    public void setCardHolder(String cardHolder) {
+    /**
+     * Sets the cardholder's email.
+     *
+     * @param cardHolder a String representing the cardholder's email.
+     */
+
+    public void setCardHolder(final String cardHolder) {
         this.cardHolder = cardHolder;
     }
 
-    public void setAccount(String account) {
+    /**
+     * Sets the associated account number.
+     *
+     * @param account a String representing the account number.
+     */
+
+    public void setAccount(final String account) {
         this.account = account;
     }
 }
