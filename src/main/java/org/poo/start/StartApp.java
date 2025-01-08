@@ -9,9 +9,21 @@ import org.poo.utils.Utils;
 
 
 public final class StartApp {
+    private static StartApp instance;
 
     private StartApp() {
 
+    }
+
+    public static StartApp getInstance() {
+        if (instance == null) {
+            instance = new StartApp();
+        }
+        return instance;
+    }
+
+    private void clear() {
+        instance = null;
     }
 
     /**
@@ -28,7 +40,7 @@ public final class StartApp {
      * @param output       The {@link ArrayNode}
      *                     where the results of the executed commands will be stored.
      */
-    public static void start(final ObjectInput objectInput,
+    public void start(final ObjectInput objectInput,
                         final ArrayNode output) {
         ObjectMapper objectMapper = new ObjectMapper();
         Client client = new Client(objectInput, objectMapper, output);
@@ -40,6 +52,7 @@ public final class StartApp {
             }
         }
         Utils.resetRandom();
+        clear();
     }
 
 

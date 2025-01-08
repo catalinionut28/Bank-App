@@ -3,6 +3,7 @@ package org.poo.bank;
 import org.poo.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SavingsAccount extends Account {
     private double interestRate;
@@ -19,6 +20,15 @@ public class SavingsAccount extends Account {
         this.setTransactionHistory(new ArrayList<>());
         this.report = new ArrayList<>();
         this.interestRate = 0;
+        this.setClothesCashback(null);
+        this.setFoodCashback(null);
+        this.setTechCashback(null);
+        this.setHadClothesCashback(false);
+        this.setHadFoodCashback(false);
+        this.setHadTechCashback(false);
+        this.setCommerciantMap(new HashMap<>());
+        this.setSpendingThreshold(null);
+        this.setSpendingTotal(0);
     }
 
 

@@ -1,9 +1,11 @@
 package org.poo.bank;
 
+import org.poo.commerciants.*;
 import org.poo.graph.CurrencyGraph;
 import org.poo.graph.Node;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public abstract class Account implements DaoObject {
     private String iban;
@@ -14,6 +16,51 @@ public abstract class Account implements DaoObject {
     private String type;
     private ArrayList<Transaction> userTransactions;
     private ArrayList<Transaction> transactionHistory;
+    private HashMap<Merchant, Integer> commerciantMap;
+    private SpendingThreshold spendingThreshold;
+    private double spendingTotal;
+    private boolean hadFoodCashback;
+    private boolean hadClothesCashback;
+    private boolean hadTechCashback;
+    private FoodCashback foodCashback;
+    private TechCashback techCashback;
+    private ClothesCashback clothesCashback;
+
+    public void setCommerciantMap(HashMap<Merchant, Integer> commerciantMap) {
+        this.commerciantMap = commerciantMap;
+    }
+
+    public void setFoodCashback(FoodCashback foodCashback) {
+        this.foodCashback = foodCashback;
+    }
+
+    public void setHadClothesCashback(boolean hadClothesCashback) {
+        this.hadClothesCashback = hadClothesCashback;
+    }
+
+    public void setHadFoodCashback(boolean hadFoodCashback) {
+        this.hadFoodCashback = hadFoodCashback;
+    }
+
+    public void setClothesCashback(ClothesCashback clothesCashback) {
+        this.clothesCashback = clothesCashback;
+    }
+
+    public void setHadTechCashback(boolean hadTechCashback) {
+        this.hadTechCashback = hadTechCashback;
+    }
+
+    public void setSpendingThreshold(SpendingThreshold spendingThreshold) {
+        this.spendingThreshold = spendingThreshold;
+    }
+
+    public void setSpendingTotal(double spendingTotal) {
+        this.spendingTotal = spendingTotal;
+    }
+
+    public void setTechCashback(TechCashback techCashback) {
+        this.techCashback = techCashback;
+    }
 
     /**
      * Retrieves the transaction history.
@@ -237,12 +284,104 @@ public abstract class Account implements DaoObject {
      * @param cardNumber a String representing the card number used for payment.
      */
 
-    public void payOnline(final double amount, final String cardNumber) {
+    public void payOnline(final double amount, final String cardNumber, final Merchant commerciant,
+                          double ronAmount) {
         balance -= amount;
         Card card = getCard(cardNumber);
         if (card.isOneTimeCard()) {
             cards.remove(card);
             createOneTimeCard();
+        }
+        getCashback(commerciant.getType(), amount);
+        createCashback(commerciant, amount, ronAmount);
+    }
+
+    private void getCashback(String commerciantType, double amount) {
+        CashbackContext cashbackContext = new CashbackContext(null);
+        switch (commerciantType) {
+            case "Food":
+                if (foodCashback != null) {
+                    cashbackContext.setCashbackStrategy(foodCashback);
+                    addFunds(cashbackContext.performCashback(amount));
+                    foodCashback = null;
+                }
+                break;
+            case "Tech":
+                if (techCashback != null) {
+                    cashbackContext.setCashbackStrategy(techCashback);
+                    addFunds(cashbackContext.performCashback(amount));
+                    techCashback = null;
+                }
+                break;
+            case "Clothes":
+                if (clothesCashback != null) {
+                    cashbackContext.setCashbackStrategy(clothesCashback);
+                    addFunds(cashbackContext.performCashback(amount));
+                    clothesCashback = null;
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    private void createCashback(final Merchant commerciant, double amount, double ronAmount) {
+        switch (commerciant.getCashbackStrategy()) {
+            case "nrOfTransactions":
+                if (!commerciantMap.containsKey(commerciant)) {
+                    commerciantMap.put(commerciant, 1);
+                } else {
+                    Integer payments = commerciantMap.get(commerciant);
+                    commerciantMap.put(commerciant, payments + 1);
+                }
+                switch (commerciant.getType()) {
+                    case "Food":
+                        if (hadFoodCashback) {
+                            return;
+                        }
+                        if (commerciantMap.get(commerciant) == 2) {
+                            foodCashback = new FoodCashback();
+                            hadFoodCashback = true;
+                        }
+                        break;
+                    case "Clothes":
+                        if (hadClothesCashback) {
+                            return;
+                        }
+                        if (commerciantMap.get(commerciant) == 5) {
+                            clothesCashback = new ClothesCashback();
+                            hadClothesCashback = true;
+                        }
+                        break;
+                    case "Tech":
+                        if (hadTechCashback) {
+                            return;
+                        }
+                        if (commerciantMap.get(commerciant) == 10) {
+                            techCashback = new TechCashback();
+                            hadTechCashback = true;
+                        }
+                        break;
+                    default:
+                        break;
+
+                }
+                break;
+            case "spendingThreshold":
+                spendingTotal += ronAmount;
+                if (spendingTotal >= 500) {
+                    spendingThreshold = new ThirdSpendingThreshold("student");
+                } else if (spendingTotal >= 300) {
+                    spendingThreshold = new SecondSpendingThreshold("student");
+                } else if (spendingTotal >= 100) {
+                    spendingThreshold = new FirstSpendingThreshold("student");
+                }
+                if (spendingThreshold != null) {
+                    CashbackContext cashbackContext = new CashbackContext(spendingThreshold);
+                    addFunds(cashbackContext.performCashback(amount));
+                }
+                break;
         }
     }
 

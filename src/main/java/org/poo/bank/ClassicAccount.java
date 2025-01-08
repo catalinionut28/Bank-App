@@ -3,6 +3,7 @@ package org.poo.bank;
 import org.poo.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ClassicAccount extends Account {
     private ArrayList<CardPayment> spendingsReport;
@@ -17,6 +18,15 @@ public class ClassicAccount extends Account {
         this.setUserTransactions(transactions);
         this.setTransactionHistory(new ArrayList<Transaction>());
         this.setSpendingsReport(new ArrayList<>());
+        this.setClothesCashback(null);
+        this.setFoodCashback(null);
+        this.setTechCashback(null);
+        this.setHadClothesCashback(false);
+        this.setHadFoodCashback(false);
+        this.setHadTechCashback(false);
+        this.setCommerciantMap(new HashMap<>());
+        this.setSpendingThreshold(null);
+        this.setSpendingTotal(0);
     }
     /**
      * Retrieves the list of card payments representing the spending report.

@@ -2,10 +2,8 @@ package org.poo.command;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.bank.*;
-import org.poo.fileio.CommandInput;
-import org.poo.fileio.ExchangeInput;
-import org.poo.fileio.ObjectInput;
-import org.poo.fileio.UserInput;
+import org.poo.commerciants.Merchant;
+import org.poo.fileio.*;
 import org.poo.graph.CurrencyGraph;
 
 import java.util.ArrayList;
@@ -15,6 +13,7 @@ public class Client {
     private Invoker invoker;
     private Dao userDao;
     private CurrencyGraph currencyGraph;
+    private ArrayList<Merchant> merchants;
     private HashMap<String, Account> aliasMap;
     private ObjectMapper objectMapper;
     private ArrayNode output;
@@ -26,11 +25,15 @@ public class Client {
         userDao = new DaoImpl();
         aliasMap = new HashMap<>();
         currencyGraph = new CurrencyGraph();
+        merchants = new ArrayList<>();
         for (UserInput userInput: inputData.getUsers()) {
             userDao.update(new User(userInput));
         }
         for (ExchangeInput exchange: inputData.getExchangeRates()) {
             currencyGraph.addEdge(exchange.getFrom(), exchange.getTo(), exchange.getRate());
+        }
+        for (CommerciantInput commerciantInput: inputData.getCommerciants()) {
+            merchants.add(new Merchant(commerciantInput));
         }
         this.objectMapper = objectMapper;
         this.output = output;
@@ -158,6 +161,12 @@ public class Client {
                             }
                         }
                     }
+                    Merchant commerciant = null;
+                    for (Merchant merchant: merchants) {
+                        if (merchant.getName().equals(commandInput.getCommerciant())) {
+                            commerciant = merchant;
+                        }
+                    }
                     command = new PayOnline(user,
                                             account,
                                             commandInput.getCardNumber(),
@@ -165,7 +174,7 @@ public class Client {
                                             commandInput.getCurrency(),
                                             commandInput.getTimestamp(),
                                             currencyGraph,
-                                            commandInput.getCommerciant(),
+                                            commerciant,
                                             objectMapper,
                                             output);
                     return command;
@@ -324,7 +333,34 @@ public class Client {
                             output);
                     return command;
 
-
+                case WITHDRAW_SAVINGS:
+                    for (DaoObject userData: userDao.getAll()) {
+                        User usr = (User) userData;
+                        Account acc = (Account) usr
+                                .getAccountDao()
+                                .get(commandInput.getAccount());
+                        if (acc != null) {
+                            account = acc;
+                            user = usr;
+                        }
+                    }
+                    Account classicAccount = null;
+                    try {
+                        for (DaoObject accData : user.getAccountDao().getAll()) {
+                            Account acc = (Account) accData;
+                            if (acc.getType().equals("classic")
+                                    && acc.getCurrency().equals(account.getCurrency())) {
+                                classicAccount = acc;
+                            }
+                        }
+                    } catch (NullPointerException e) {
+                    }
+                    command = new WithdrawSavings(user, account,
+                            classicAccount, commandInput.getAmount(),
+                            commandInput.getTimestamp(),
+                            objectMapper,
+                            output);
+                    return command;
                 default:
                     break;
             }

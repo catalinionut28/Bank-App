@@ -18,7 +18,8 @@ public enum CommandType {
     REPORT("report"),
     SPENDINGS_REPORT("spendingsReport"),
     ADD_INTEREST("addInterest"),
-    CHANGE_INTEREST_RATE("changeInterestRate");
+    CHANGE_INTEREST_RATE("changeInterestRate"),
+    WITHDRAW_SAVINGS("withdrawSavings");
 
     private final String command;
 

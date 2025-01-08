@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.bank.*;
+import org.poo.commerciants.Merchant;
 import org.poo.graph.CurrencyGraph;
 import org.poo.graph.Node;
 
@@ -383,7 +384,7 @@ class PayOnline implements Command {
     private double amount;
     private String currency;
     private int timestamp;
-    private String commerciant;
+    private Merchant commerciant;
     private CurrencyGraph graph;
     private ObjectMapper objectMapper;
     private ArrayNode output;
@@ -395,7 +396,7 @@ class PayOnline implements Command {
                      final String currency,
                      final int timestamp,
                      final CurrencyGraph graph,
-                     final String commerciant,
+                     final Merchant commerciant,
                      final ObjectMapper objectMapper,
                      final ArrayNode output) {
         this.user = user;
@@ -441,6 +442,9 @@ class PayOnline implements Command {
             account.getTransactionHistory().add(frozenPayment);
             return;
         }
+        double ronAmount = graph.exchange(new Node(currency, 1),
+                new Node("RON", 1),
+                amount);
         if (account.getCurrency().equals(currency)) {
             if (account.getBalance() < amount) {
                 InsufficientFunds insufficientFunds =
@@ -450,8 +454,8 @@ class PayOnline implements Command {
                 return;
             }
             CardPayment transaction =
-                    new CardPayment(timestamp, commerciant, amount);
-            account.payOnline(amount, cardNumber);
+                    new CardPayment(timestamp, commerciant.getName(), amount);
+            account.payOnline(amount, cardNumber, commerciant, ronAmount);
             user.getTransactions().add(transaction);
             account.getTransactionHistory().add(transaction);
             if (account.getType().equals("classic")) {
@@ -469,8 +473,8 @@ class PayOnline implements Command {
                 return;
             }
             CardPayment transaction =
-                    new CardPayment(timestamp, commerciant, newAmount);
-            account.payOnline(newAmount, cardNumber);
+                    new CardPayment(timestamp, commerciant.getName(), newAmount);
+            account.payOnline(newAmount, cardNumber, commerciant, ronAmount);
             user.getTransactions().add(transaction);
             account.getTransactionHistory().add(transaction);
             if (account.getType().equals("classic")) {
@@ -710,6 +714,11 @@ class PrintTransactions implements Command {
                             interestChanged.getDescription());
                     transactionNode.put("timestamp",
                             interestChanged.getTimestamp());
+                    break;
+                case "SavingsWithdrawn":
+                    SavingsWithdrawn savingsWithdrawn = (SavingsWithdrawn) transaction;
+                    transactionNode.put("timestamp", savingsWithdrawn.getTimestamp());
+                    transactionNode.put("description", savingsWithdrawn.getDescription());
                     break;
                 default:
                     break;
