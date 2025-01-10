@@ -3,6 +3,9 @@ package org.poo.bank;
 import org.poo.commerciants.*;
 import org.poo.graph.CurrencyGraph;
 import org.poo.graph.Node;
+import org.poo.plan.ServicePlan;
+import org.poo.plan.SilverPlan;
+import org.poo.plan.StandardPlan;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +28,15 @@ public abstract class Account implements DaoObject {
     private FoodCashback foodCashback;
     private TechCashback techCashback;
     private ClothesCashback clothesCashback;
+    private ServicePlan plan;
+
+    public ServicePlan getPlan() {
+        return plan;
+    }
+
+    public void setPlan(ServicePlan plan) {
+        this.plan = plan;
+    }
 
     public void setCommerciantMap(HashMap<Merchant, Integer> commerciantMap) {
         this.commerciantMap = commerciantMap;
@@ -365,17 +377,16 @@ public abstract class Account implements DaoObject {
                         break;
                     default:
                         break;
-
                 }
                 break;
             case "spendingThreshold":
                 spendingTotal += ronAmount;
                 if (spendingTotal >= 500) {
-                    spendingThreshold = new ThirdSpendingThreshold("student");
+                    spendingThreshold = new ThirdSpendingThreshold(plan.getType());
                 } else if (spendingTotal >= 300) {
-                    spendingThreshold = new SecondSpendingThreshold("student");
+                    spendingThreshold = new SecondSpendingThreshold(plan.getType());
                 } else if (spendingTotal >= 100) {
-                    spendingThreshold = new FirstSpendingThreshold("student");
+                    spendingThreshold = new FirstSpendingThreshold(plan.getType());
                 }
                 if (spendingThreshold != null) {
                     CashbackContext cashbackContext = new CashbackContext(spendingThreshold);
@@ -421,6 +432,7 @@ public abstract class Account implements DaoObject {
                           final CurrencyGraph exchangeGraph,
                           final int timestamp,
                           final String description) {
+        //TODO: Add sendMoney for a merchant
         this.balance -= amount;
         String formattedAmount = String.valueOf(amount)
                                 + " " + currency;
@@ -432,6 +444,20 @@ public abstract class Account implements DaoObject {
                                                 "sent");
         userTransactions.add(transaction);
         transactionHistory.add(transaction);
+        switch (plan.getType()) {
+            case "standard":
+                balance -= ((StandardPlan) plan).calculateCommission(amount);
+                break;
+            case "silver":
+                double ronAmount = exchangeGraph
+                        .exchange(new Node(this.getCurrency(), 1),
+                                new Node("RON", 1),
+                                amount);
+                balance -= ((SilverPlan) plan).calculateCommission(amount, ronAmount);
+                break;
+            default:
+                break;
+        }
 
         if (this.currency.equals(receiver.getCurrency())) {
             receiver.receiveMoney(amount);
@@ -468,6 +494,9 @@ public abstract class Account implements DaoObject {
                     .add(receiveTransaction);
             receiver.receiveMoney(amount);
         }
+    }
+    public void payUpgradeFee(double feeConverted) {
+        balance -= feeConverted;
     }
 }
 

@@ -1,5 +1,6 @@
 package org.poo.bank;
 
+import org.poo.plan.ServicePlan;
 import org.poo.utils.Utils;
 
 import java.util.ArrayList;
@@ -9,7 +10,8 @@ public class ClassicAccount extends Account {
     private ArrayList<CardPayment> spendingsReport;
 
     public ClassicAccount(final String currency,
-                          final ArrayList<Transaction> transactions) {
+                          final ArrayList<Transaction> transactions,
+                          final ServicePlan plan) {
         this.setBalance(0);
         this.setCards(new ArrayList<>());
         this.setIban(Utils.generateIBAN());
@@ -27,6 +29,7 @@ public class ClassicAccount extends Account {
         this.setCommerciantMap(new HashMap<>());
         this.setSpendingThreshold(null);
         this.setSpendingTotal(0);
+        this.setPlan(plan);
     }
     /**
      * Retrieves the list of card payments representing the spending report.

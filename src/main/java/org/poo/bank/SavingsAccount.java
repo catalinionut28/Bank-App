@@ -1,5 +1,6 @@
 package org.poo.bank;
 
+import org.poo.plan.ServicePlan;
 import org.poo.utils.Utils;
 
 import java.util.ArrayList;
@@ -10,7 +11,9 @@ public class SavingsAccount extends Account {
     private ArrayList<Transaction> report;
 
     public SavingsAccount(final String currency,
-                          final ArrayList<Transaction> transactions) {
+                          final ArrayList<Transaction> transactions,
+                          final double interestRate,
+                          final ServicePlan plan) {
         this.setBalance(0);
         this.setCards(new ArrayList<>());
         this.setIban(Utils.generateIBAN());
@@ -19,7 +22,7 @@ public class SavingsAccount extends Account {
         this.setUserTransactions(transactions);
         this.setTransactionHistory(new ArrayList<>());
         this.report = new ArrayList<>();
-        this.interestRate = 0;
+        this.interestRate = interestRate;
         this.setClothesCashback(null);
         this.setFoodCashback(null);
         this.setTechCashback(null);
@@ -29,6 +32,7 @@ public class SavingsAccount extends Account {
         this.setCommerciantMap(new HashMap<>());
         this.setSpendingThreshold(null);
         this.setSpendingTotal(0);
+        this.setPlan(plan);
     }
 
 

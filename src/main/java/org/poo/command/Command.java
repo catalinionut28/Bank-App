@@ -7,6 +7,9 @@ import org.poo.bank.*;
 import org.poo.commerciants.Merchant;
 import org.poo.graph.CurrencyGraph;
 import org.poo.graph.Node;
+import org.poo.plan.ServicePlan;
+import org.poo.plan.SilverPlan;
+import org.poo.plan.StandardPlan;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +30,7 @@ class AddAccount implements Command {
     private final User user;
     private final String accountType;
     private final String currency;
+    private final double interestRate;
     private final int timestamp;
     private String error;
     private final ObjectMapper objectMapper;
@@ -35,6 +39,7 @@ class AddAccount implements Command {
     AddAccount(final User user,
                       final String accountType,
                       final String currency,
+                      final double interestRate,
                       final int timestamp,
                       final ObjectMapper objectMapper,
                       final ArrayNode arrayNode) {
@@ -44,6 +49,7 @@ class AddAccount implements Command {
         this.timestamp = timestamp;
         this.objectMapper = objectMapper;
         this.output = arrayNode;
+        this.interestRate = interestRate;
         this.error = null;
     }
 
@@ -60,7 +66,7 @@ class AddAccount implements Command {
         if (accountType.equals("classic")) {
             user.createClassicAccount(currency, timestamp);
         } else {
-            user.createSavingsAccount(currency, timestamp);
+            user.createSavingsAccount(currency, timestamp, interestRate);
         }
     }
 }
@@ -445,8 +451,10 @@ class PayOnline implements Command {
         double ronAmount = graph.exchange(new Node(currency, 1),
                 new Node("RON", 1),
                 amount);
+        double commission;
         if (account.getCurrency().equals(currency)) {
-            if (account.getBalance() < amount) {
+            commission = getCommission(amount, ronAmount);
+            if (account.getBalance() + commission < amount) {
                 InsufficientFunds insufficientFunds =
                         new InsufficientFunds(timestamp);
                 user.getTransactions().add(insufficientFunds);
@@ -465,7 +473,8 @@ class PayOnline implements Command {
             double newAmount = graph.exchange(new Node(currency, 1.0),
                                             new Node(account.getCurrency(), 1),
                                             amount);
-            if (account.getBalance() < newAmount) {
+            commission = getCommission(newAmount, ronAmount);
+            if (account.getBalance() < newAmount + commission) {
                 InsufficientFunds insufficientFunds =
                         new InsufficientFunds(timestamp);
                 user.getTransactions().add(insufficientFunds);
@@ -495,6 +504,24 @@ class PayOnline implements Command {
             user.getTransactions().add(cardCreation);
             account.getTransactionHistory().add(cardCreation);
         }
+    }
+
+    private double getCommission(double amount, double ronAmount) {
+        double commission = 0;
+        switch (user.getPlan().getType()) {
+            case "standard":
+                commission = ((StandardPlan) user
+                        .getPlan())
+                        .calculateCommission(amount);
+                break;
+            case "silver":
+                commission = ((SilverPlan) user.getPlan())
+                        .calculateCommission(amount, ronAmount);
+                break;
+            default:
+                break;
+        }
+        return commission;
     }
 }
 
@@ -719,6 +746,14 @@ class PrintTransactions implements Command {
                     SavingsWithdrawn savingsWithdrawn = (SavingsWithdrawn) transaction;
                     transactionNode.put("timestamp", savingsWithdrawn.getTimestamp());
                     transactionNode.put("description", savingsWithdrawn.getDescription());
+                    break;
+                case "UpgradePlan":
+                    UpgradePlanTransaction planTransaction =
+                            (UpgradePlanTransaction) transaction;
+                    transactionNode.put("timestamp", planTransaction.getTimestamp());
+                    transactionNode.put("description", planTransaction.getDescription());
+                    transactionNode.put("accountIBAN", planTransaction.getAccountIban());
+                    transactionNode.put("newPlanType", planTransaction.getNewPlanType());
                     break;
                 default:
                     break;
@@ -1021,6 +1056,14 @@ class Report implements Command {
                                                                 .get(i));
                                 }
                                 transactionNode.set("involvedAccounts", involvedAccountsArray);
+                                break;
+                            case "UpgradePlan":
+                                UpgradePlanTransaction planTransaction =
+                                        (UpgradePlanTransaction) transaction;
+                                transactionNode.put("timestamp", planTransaction.getTimestamp());
+                                transactionNode.put("description", planTransaction.getDescription());
+                                transactionNode.put("accountIBAN", planTransaction.getAccountIban());
+                                transactionNode.put("newPlanType", planTransaction.getNewPlanType());
                                 break;
                             default:
                                 break;
@@ -1338,6 +1381,66 @@ class WithdrawSavings implements Command {
                 .withdraw(((ClassicAccount) account), amount);
         user.getTransactions().add(new SavingsWithdrawn(timestamp,
                 "Savings withdrawal"));
+    }
+}
+
+class UpgradePlan implements Command {
+    private User user;
+    private Account account;
+    private String type;
+    private int timestamp;
+    private CurrencyGraph graph;
+    private ObjectMapper objectMapper;
+    private ArrayNode output;
+
+    UpgradePlan(User user,
+                Account account,
+                String type,
+                int timestamp,
+                CurrencyGraph graph,
+                ObjectMapper objectMapper,
+                ArrayNode output) {
+        this.user = user;
+        this.account = account;
+        this.type = type;
+        this.graph = graph;
+        this.timestamp = timestamp;
+        this.objectMapper = objectMapper;
+        this.output = output;
+    }
+
+    @Override
+    public void execute() {
+        if (account == null) {
+            // print the error
+            System.out.println("The account doesn t exist");
+            return;
+        }
+        ServicePlan newPlan = ServicePlan.createPlan(type);
+        if (user.getPlan().compareTo(newPlan) > 0) {
+            // TODO: treat the downgrade error
+            System.out.println("Cannot Downgrade");
+            return;
+        }
+        if (user.getPlan().compareTo(newPlan) == 0) {
+            // TODO: treat the error
+            System.out.println("you already have this type of plan");
+            return;
+        }
+        double convertedFee = graph.exchange(new Node("RON", 1),
+                new Node(account.getCurrency(), 1),
+                user.getPlan().upgrade(type));
+        if (convertedFee > account.getBalance()) {
+            System.out.println("you don t have money to pay the fee");
+            return;
+        }
+        account.payUpgradeFee(convertedFee);
+        user.setPlan(newPlan);
+        user.upgradePlan();
+        UpgradePlanTransaction transaction = new
+                UpgradePlanTransaction(timestamp, account.getIban(), type);
+        user.getTransactions().add(transaction);
+        account.getTransactionHistory().add(transaction);
     }
 }
 

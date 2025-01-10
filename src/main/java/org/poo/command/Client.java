@@ -73,6 +73,7 @@ public class Client {
                     command = new AddAccount(user,
                             commandInput.getAccountType(),
                             commandInput.getCurrency(),
+                            commandInput.getInterestRate(),
                             commandInput.getTimestamp(),
                             objectMapper,
                             output);
@@ -358,6 +359,24 @@ public class Client {
                     command = new WithdrawSavings(user, account,
                             classicAccount, commandInput.getAmount(),
                             commandInput.getTimestamp(),
+                            objectMapper,
+                            output);
+                    return command;
+                case UPGRADE_PLAN:
+                    for (DaoObject userData: userDao.getAll()) {
+                        User usr = (User) userData;
+                        DaoObject accData = usr.getAccountDao().get(commandInput.getAccount());
+                        Account acc = (Account) accData;
+                        if (acc != null) {
+                            account = acc;
+                            user = usr;
+                        }
+                    }
+                    command = new UpgradePlan(user,
+                            account,
+                            commandInput.getNewPlanType(),
+                            commandInput.getTimestamp(),
+                            currencyGraph,
                             objectMapper,
                             output);
                     return command;

@@ -1,7 +1,10 @@
 package org.poo.bank;
 
 import org.poo.fileio.UserInput;
+import org.poo.plan.StandardPlan;
+import org.poo.plan.StudentPlan;
 import org.poo.utils.Utils;
+import org.poo.plan.ServicePlan;
 
 import java.util.ArrayList;
 
@@ -13,6 +16,7 @@ public class User implements DaoObject {
     private Dao accountDao;
     private int age;
     private String occupation;
+    private ServicePlan plan;
     private ArrayList<Transaction> transactions;
 
     public User(final UserInput userInput) {
@@ -23,7 +27,22 @@ public class User implements DaoObject {
         this.transactions = new ArrayList<>();
         this.occupation = userInput.getOccupation();
         this.age = Utils.calculateAge(userInput.getBirthDate());
+        if (occupation.equals("student")) {
+            this.plan = new StudentPlan();
+        } else {
+            this.plan = new StandardPlan();
+        }
     }
+
+    public ServicePlan getPlan() {
+        return plan;
+    }
+
+    public void setPlan(ServicePlan plan) {
+        this.plan = plan;
+    }
+
+
 
     public String getOccupation() {
         return occupation;
@@ -131,7 +150,7 @@ public class User implements DaoObject {
     public void createClassicAccount(final String currency,
                                      final int timestamp) {
         try {
-            ClassicAccount account = new ClassicAccount(currency, transactions);
+            ClassicAccount account = new ClassicAccount(currency, transactions, plan);
             accountDao.update(account);
             AccountCreation transaction = new AccountCreation(timestamp);
             transactions.add(transaction);
@@ -149,9 +168,10 @@ public class User implements DaoObject {
      */
 
     public void createSavingsAccount(final String currency,
-                                     final int timestamp) {
+                                     final int timestamp,
+                                     final double interestRate) {
         try {
-            accountDao.update(new SavingsAccount(currency, transactions));
+            accountDao.update(new SavingsAccount(currency, transactions, interestRate, plan));
             transactions.add(new AccountCreation(timestamp));
         } catch (IllegalArgumentException e) {
             return;
@@ -179,6 +199,13 @@ public class User implements DaoObject {
             accountDao.delete(iban);
         } catch (IllegalArgumentException e) {
             return;
+        }
+    }
+
+    public void upgradePlan() {
+        for (DaoObject accData: accountDao.getAll()) {
+            Account account = (Account) accData;
+            account.setPlan(plan);
         }
     }
 
