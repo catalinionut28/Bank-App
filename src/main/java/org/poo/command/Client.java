@@ -317,6 +317,28 @@ public class Client {
                             objectMapper,
                             output);
                     return command;
+                case CASH_WITHDRAWAL:
+                    user = (User) userDao.get(commandInput.getEmail());
+                    Card foundCard = null;
+                    for (DaoObject accData: user.getAccountDao().getAll()) {
+                        Account acc = (Account) accData;
+                        for (Card c: acc.getCards()) {
+                            if (c.getCardNumber().equals(commandInput.getCardNumber())) {
+                                account = acc;
+                                foundCard = c;
+                            }
+                        }
+                    }
+                    System.out.println("abc");
+                    command = new CashWithdrawal(user,
+                            account,
+                            foundCard,
+                            commandInput.getAmount(),
+                            commandInput.getTimestamp(),
+                            objectMapper,
+                            currencyGraph,
+                            output);
+                    return command;
                 case CHANGE_INTEREST_RATE:
                     for (DaoObject userData: userDao.getAll()) {
                         User usr = (User) userData;
@@ -380,6 +402,8 @@ public class Client {
                             objectMapper,
                             output);
                     return command;
+
+
                 default:
                     break;
             }

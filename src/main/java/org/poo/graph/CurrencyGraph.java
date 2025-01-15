@@ -150,6 +150,9 @@ public class CurrencyGraph {
     public double exchange(final Node start,
                            final Node end,
                            final double amount) {
+        if (start.getCurrency().equals(end.getCurrency())) {
+            return amount;
+        }
         resetVisited();
         try {
             return exchangeDFS(start, end, amount);

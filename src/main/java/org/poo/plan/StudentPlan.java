@@ -2,7 +2,7 @@ package org.poo.plan;
 
 public class StudentPlan extends ServicePlan {
     private final double silverFee = 100;
-    private final double goldFee = 250;
+    private final double goldFee = 350;
 
     public StudentPlan() {
         commission = 0;

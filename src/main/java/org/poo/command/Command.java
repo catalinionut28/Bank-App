@@ -440,6 +440,9 @@ class PayOnline implements Command {
             output.add(outputNode);
             return;
         }
+        if (amount == 0) {
+            return;
+        }
         Card lastCard = account.getCards().getLast();
         if (account.getCard(cardNumber).getStatus().equals("frozen")) {
             FrozenPayment frozenPayment = new FrozenPayment(timestamp,
@@ -454,7 +457,7 @@ class PayOnline implements Command {
         double commission;
         if (account.getCurrency().equals(currency)) {
             commission = getCommission(amount, ronAmount);
-            if (account.getBalance() + commission < amount) {
+            if (account.getBalance() < amount + commission) {
                 InsufficientFunds insufficientFunds =
                         new InsufficientFunds(timestamp);
                 user.getTransactions().add(insufficientFunds);
@@ -464,6 +467,7 @@ class PayOnline implements Command {
             CardPayment transaction =
                     new CardPayment(timestamp, commerciant.getName(), amount);
             account.payOnline(amount, cardNumber, commerciant, ronAmount);
+            account.setBalance(account.getBalance() - commission);
             user.getTransactions().add(transaction);
             account.getTransactionHistory().add(transaction);
             if (account.getType().equals("classic")) {
@@ -486,6 +490,7 @@ class PayOnline implements Command {
             account.payOnline(newAmount, cardNumber, commerciant, ronAmount);
             user.getTransactions().add(transaction);
             account.getTransactionHistory().add(transaction);
+            account.setBalance(account.getBalance() - commission);
             if (account.getType().equals("classic")) {
                 ((ClassicAccount) account).getSpendingsReport().add(transaction);
             }
@@ -568,9 +573,23 @@ class SendMoney implements Command {
      */
     public void execute() {
         if (sender == null || receiver == null) {
+            ObjectNode outputNode = objectMapper.createObjectNode();
+            outputNode.put("command", "sendMoney");
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            errorNode.put("timestamp", timestamp);
+            errorNode.put("description", "User not found");
+            outputNode.set("output", errorNode);
+            outputNode.put("timestamp", timestamp);
+            output.add(outputNode);
             return;
         }
-        if (sender.getBalance() < amount) {
+        if (amount == 0) {
+            return;
+        }
+        double ronAmount = graph.exchange(new Node(sender.getCurrency(),1),
+                new Node("RON", 1),
+                amount);
+        if (sender.getBalance() < amount + getCommission(amount, ronAmount)) {
             InsufficientFunds insufficientFunds =
                     new InsufficientFunds(timestamp);
             sender.getUserTransactions().add(insufficientFunds);
@@ -582,6 +601,25 @@ class SendMoney implements Command {
                         graph,
                         timestamp,
                         description);
+    }
+
+
+    private double getCommission(double amount, double ronAmount) {
+        double commission = 0;
+        switch (sender.getPlan().getType()) {
+            case "standard":
+                commission = ((StandardPlan) sender
+                        .getPlan())
+                        .calculateCommission(amount);
+                break;
+            case "silver":
+                commission = ((SilverPlan) sender.getPlan())
+                        .calculateCommission(amount, ronAmount);
+                break;
+            default:
+                break;
+        }
+        return commission;
     }
 }
 
@@ -754,6 +792,13 @@ class PrintTransactions implements Command {
                     transactionNode.put("description", planTransaction.getDescription());
                     transactionNode.put("accountIBAN", planTransaction.getAccountIban());
                     transactionNode.put("newPlanType", planTransaction.getNewPlanType());
+                    break;
+                case "CashTransaction":
+                    CashTransaction cashTransaction =
+                            (CashTransaction) transaction;
+                    transactionNode.put("timestamp", cashTransaction.getTimestamp());
+                    transactionNode.put("description", cashTransaction.getDescription());
+                    transactionNode.put("amount", cashTransaction.getRonAmount());
                     break;
                 default:
                     break;
@@ -1434,6 +1479,7 @@ class UpgradePlan implements Command {
             System.out.println("you don t have money to pay the fee");
             return;
         }
+        System.out.println("Fee:" + convertedFee);
         account.payUpgradeFee(convertedFee);
         user.setPlan(newPlan);
         user.upgradePlan();
@@ -1442,6 +1488,107 @@ class UpgradePlan implements Command {
         user.getTransactions().add(transaction);
         account.getTransactionHistory().add(transaction);
     }
+}
+
+class CashWithdrawal implements Command {
+    private User user;
+    private Account account;
+    private Card card;
+    private double ronAmount;
+    private int timestamp;
+    private CurrencyGraph currencyGraph;
+    private ObjectMapper objectMapper;
+    private  ArrayNode output;
+
+    CashWithdrawal(final User user,
+                   final Account account,
+                   Card card,
+                   final double ronAmount,
+                   final int timestamp,
+                   ObjectMapper objectMapper,
+                   CurrencyGraph currencyGraph,
+                   ArrayNode output) {
+        this.user = user;
+        this.card = card;
+        this.account = account;
+        this.timestamp = timestamp;
+        this.objectMapper = objectMapper;
+        this.ronAmount = ronAmount;
+        this.output = output;
+        this.currencyGraph = currencyGraph;
+    }
+
+    @Override
+    public void execute() {
+        if (user == null) {
+            ObjectNode outputNode = objectMapper.createObjectNode();
+            outputNode.put("command", "cashWithdrawal");
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            errorNode.put("timestamp", timestamp);
+            errorNode.put("description", "User not found");
+            outputNode.set("output", errorNode);
+            outputNode.put("timestamp", timestamp);
+            output.add(outputNode);
+            return;
+        }
+        System.out.println("Userul nu e null");
+        if (card == null) {
+            ObjectNode outputNode = objectMapper.createObjectNode();
+            outputNode.put("command", "cashWithdrawal");
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            errorNode.put("timestamp", timestamp);
+            errorNode.put("description", "Card not found");
+            outputNode.set("output", errorNode);
+            outputNode.put("timestamp", timestamp);
+            output.add(outputNode);
+            return;
+        }
+        System.out.println("Cardul exista");
+        if (card.getStatus().equals("frozen")) {
+            FrozenPayment frozenPayment = new FrozenPayment(timestamp,
+                    "The card is frozen");
+            user.getTransactions().add(frozenPayment);
+            account.getTransactionHistory().add(frozenPayment);
+            return;
+        }
+        System.out.println("Cardul e activ");
+        double amount = currencyGraph.exchange(new Node("RON", 1),
+               new Node(account.getCurrency(), 1),
+                ronAmount);
+        if (account.getBalance() < amount + getCommission(amount, ronAmount)) {
+            InsufficientFunds insufficientFunds = new InsufficientFunds(timestamp);
+            user.getTransactions().add(insufficientFunds);
+            account.getTransactionHistory().add(insufficientFunds);
+            return;
+        }
+        System.out.println("A scos " + amount);
+        account.withdrawCash(amount, ronAmount, card);
+        CashTransaction cashTransaction = new CashTransaction(timestamp, ronAmount);
+        user.getTransactions().add(cashTransaction);
+        account.getTransactionHistory().add(cashTransaction);
+
+
+    }
+
+    private double getCommission(double amount, double ronAmount) {
+        double commission = 0;
+        switch (user.getPlan().getType()) {
+            case "standard":
+                commission = ((StandardPlan) user
+                        .getPlan())
+                        .calculateCommission(amount);
+                break;
+            case "silver":
+                commission = ((SilverPlan) user.getPlan())
+                        .calculateCommission(amount, ronAmount);
+                break;
+            default:
+                break;
+        }
+        return commission;
+    }
+
+
 }
 
 

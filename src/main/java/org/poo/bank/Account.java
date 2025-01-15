@@ -498,6 +498,25 @@ public abstract class Account implements DaoObject {
     public void payUpgradeFee(double feeConverted) {
         balance -= feeConverted;
     }
+
+    public void withdrawCash(double amount, double ronAmount, Card card) {
+        if (currency.equals("RON")) {
+            balance -= ronAmount;
+            amount = ronAmount;
+        } else {
+            balance -= amount;
+        }
+        switch (plan.getType()) {
+            case "standard":
+                balance -= ((StandardPlan) plan).calculateCommission(amount);
+                break;
+            case "silver":
+                balance -= ((SilverPlan) plan).calculateCommission(amount, ronAmount);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 

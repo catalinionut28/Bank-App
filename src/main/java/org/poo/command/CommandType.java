@@ -20,7 +20,8 @@ public enum CommandType {
     ADD_INTEREST("addInterest"),
     CHANGE_INTEREST_RATE("changeInterestRate"),
     WITHDRAW_SAVINGS("withdrawSavings"),
-    UPGRADE_PLAN("upgradePlan");
+    UPGRADE_PLAN("upgradePlan"),
+    CASH_WITHDRAWAL("cashWithdrawal");
 
     private final String command;
 
