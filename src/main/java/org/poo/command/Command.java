@@ -800,6 +800,13 @@ class PrintTransactions implements Command {
                     transactionNode.put("description", cashTransaction.getDescription());
                     transactionNode.put("amount", cashTransaction.getRonAmount());
                     break;
+                case "InterestRateIncome":
+                    InterestRateIncome interestRateIncome = (InterestRateIncome) transaction;
+                    transactionNode.put("amount", interestRateIncome.getAmount());
+                    transactionNode.put("currency", interestRateIncome.getCurrency());
+                    transactionNode.put("description", interestRateIncome.getDescription());
+                    transactionNode.put("timestamp", interestRateIncome.getTimestamp());
+                    break;
                 default:
                     break;
             }
@@ -1361,7 +1368,9 @@ class AddInterest implements Command {
             return;
         }
         SavingsAccount savingsAccount = (SavingsAccount) account;
-        savingsAccount.addInterestRate();
+        double income = savingsAccount.addInterestRate();
+        account.getUserTransactions().add(new InterestRateIncome(income,
+                account.getCurrency(), timestamp));
     }
 }
 

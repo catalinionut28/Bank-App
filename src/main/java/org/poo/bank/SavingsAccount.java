@@ -51,8 +51,10 @@ public class SavingsAccount extends Account {
      * The balance is updated by multiplying the current
      * balance by the interest rate and adding it to the balance.
      */
-    public void addInterestRate() {
-        setBalance(getBalance() + getBalance() * interestRate);
+    public double addInterestRate() {
+        double income = getBalance() * interestRate;
+        setBalance(getBalance() + income);
+        return income;
     }
 
     /**
