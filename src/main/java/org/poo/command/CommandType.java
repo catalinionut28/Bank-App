@@ -21,7 +21,9 @@ public enum CommandType {
     CHANGE_INTEREST_RATE("changeInterestRate"),
     WITHDRAW_SAVINGS("withdrawSavings"),
     UPGRADE_PLAN("upgradePlan"),
-    CASH_WITHDRAWAL("cashWithdrawal");
+    CASH_WITHDRAWAL("cashWithdrawal"),
+    ACCEPT_SPLIT_PAYMENT("acceptSplitPayment"),
+    REJECT_SPLIT_PAYMENT("rejectSplitPayment");
 
     private final String command;
 

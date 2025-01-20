@@ -10,6 +10,7 @@ import org.poo.graph.Node;
 import org.poo.plan.ServicePlan;
 import org.poo.plan.SilverPlan;
 import org.poo.plan.StandardPlan;
+import org.poo.visitor.Visitor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -755,13 +756,22 @@ class PrintTransactions implements Command {
                     transactionNode.put("timestamp", splitPayment.getTimestamp());
                     transactionNode.put("description", splitPayment.getDescription());
                     transactionNode.put("currency", splitPayment.getCurrency());
-                    transactionNode.put("amount", splitPayment.getAmount());
+                    transactionNode.put("splitPaymentType", splitPayment.getSplitType());
+                    ArrayNode amounts = objectMapper.createArrayNode();
+                    for (Double amount: splitPayment.getAmountForUsers()) {
+                        amounts.add(amount);
+                    }
+                    if (splitPayment.getSplitType().equals("custom")) {
+                        transactionNode.set("amountForUsers", amounts);
+                    } else {
+                        transactionNode.put("amount", splitPayment.getAmountForUsers().get(0));
+                    }
                     if (splitPayment.getError() != null) {
                         transactionNode.put("error", splitPayment.getError());
                     }
                     ArrayNode involvedAccountsArray = objectMapper.createArrayNode();
-                    for (int i = splitPayment.getInvolvedAccounts().size() - 1;
-                    i >= 0; i--) {
+                    for (int i = 0;
+                         i < splitPayment.getInvolvedAccounts().size(); i++) {
                         involvedAccountsArray.add(splitPayment
                                 .getInvolvedAccounts()
                                 .get(i));
@@ -883,28 +893,37 @@ class CheckCardStatus implements Command {
 }
 
 class SplitPayment implements Command {
+    private ArrayList<User> users;
     private ArrayList<Account> accounts;
     private double amount;
     private String currency;
     private int timestamp;
+    ArrayList<Double> amounts;
+    private String type;
     private CurrencyGraph graph;
     private ObjectMapper objectMapper;
     private ArrayNode output;
 
-    SplitPayment(final ArrayList<Account> accounts,
+    SplitPayment(final ArrayList<User> users,
+            final ArrayList<Account> accounts,
                         final double amount,
+                        final String type,
                         final String currency,
                         final int timestamp,
+                        final ArrayList<Double> amounts,
                         final CurrencyGraph graph,
                         final ObjectMapper objectMapper,
                         final ArrayNode output) {
+        this.users = users;
         this.accounts = accounts;
+        this.amounts = amounts;
         this.amount = amount;
         this.currency = currency;
         this.timestamp = timestamp;
         this.graph = graph;
         this.objectMapper = objectMapper;
         this.output = output;
+        this.type = type;
     }
 
     /**
@@ -920,57 +939,17 @@ class SplitPayment implements Command {
      * and a transaction record is added for each account.
      */
     public void execute() {
-        double[] amountsExchanged = new double[accounts.size()];
-        ArrayList<String> involvedAccounts = new ArrayList<>();
-        String errorMessage = null;
-        String error = null;
-        for (int i = accounts.size() - 1; i >= 0; i--) {
-            Account account = accounts.get(i);
-            if (account == null) {
-                return;
-            }
-            amountsExchanged[i] = graph.exchange(new Node(currency, 1),
-                    new Node(account.getCurrency(), 1),
-                    amount / accounts.size());
-            if (account.getBalance() < amountsExchanged[i]) {
-                errorMessage = "Account "
-                        + account.getIban()
-                        + " has insufficient funds "
-                        + "for a split payment.";
-                if (error == null) {
-                    error = errorMessage;
-                }
-            }
-            involvedAccounts.add(account.getIban());
-        }
-        String description = "Split payment of "
-                + String.format("%.2f", amount)
-                + " "
-                + currency;
-        if (error != null) {
-            SplitPaymentTransaction err =
-                    new SplitPaymentTransaction(timestamp,
-                            description, currency,
-                            amount / accounts.size(),
-                            involvedAccounts, error);
-            for (Account account: accounts) {
-                account.getUserTransactions().add(err);
-                account.getTransactionHistory().add(err);
-            }
-            return;
-        }
-        for (int i = 0; i < accounts.size(); i++) {
-            accounts.get(i).splitPay(amountsExchanged[i]);
-            SplitPaymentTransaction transaction = new SplitPaymentTransaction(timestamp,
-                    description, currency,
-                    amount / accounts.size(),
-                    involvedAccounts, error);
-            accounts.get(i)
-                    .getUserTransactions()
-                    .add(transaction);
-            accounts.get(i)
-                    .getTransactionHistory()
-                    .add(transaction);
+        MultiplePayment splitPayment = new MultiplePayment(amount,
+                currency, timestamp, type, amounts, users);
+        System.out.println(type);
+        for (int i = 0; i < amounts.size(); i++) {
+            double convertedAmount = graph.exchange(new Node(currency, 1),
+                    new Node(accounts.get(i).getCurrency(), 1), amounts.get(i));
+            PendingPayment payment = new PendingPayment(convertedAmount, accounts.get(i).getCurrency(),
+                    timestamp, accounts.get(i), splitPayment);
+            splitPayment.addPayment(payment);
+            System.out.println(accounts.get(i).getIban() + "Iban");
+            users.get(i).getPendingPayments().add(payment);
         }
     }
 }
@@ -1101,8 +1080,8 @@ class Report implements Command {
                                     transactionNode.put("error", splitPayment.getError());
                                 }
                                 ArrayNode involvedAccountsArray = objectMapper.createArrayNode();
-                                for (int i = splitPayment.getInvolvedAccounts().size() - 1;
-                                     i >= 0; i--) {
+                                for (int i = 0;
+                                     i < splitPayment.getInvolvedAccounts().size(); i++) {
                                     involvedAccountsArray.add(splitPayment
                                                                 .getInvolvedAccounts()
                                                                 .get(i));
@@ -1596,8 +1575,74 @@ class CashWithdrawal implements Command {
         }
         return commission;
     }
+}
 
+class AcceptSplitPayment implements Command {
+    private User user;
+    private int timestamp;
+    private ArrayNode output;
+    private ObjectMapper objectMapper;
 
+    AcceptSplitPayment(User user,
+                       int timestamp,
+                       ArrayNode output,
+                       ObjectMapper objectMapper) {
+        this.user = user;
+        this.timestamp = timestamp;
+        this.output = output;
+        this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public void execute() {
+        if (user == null) {
+            ObjectNode outputNode = objectMapper.createObjectNode();
+            outputNode.put("command", "acceptSplitPayment");
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            errorNode.put("timestamp", timestamp);
+            errorNode.put("description", "User not found");
+            outputNode.set("output", errorNode);
+            outputNode.put("timestamp", timestamp);
+            output.add(outputNode);
+            return;
+        }
+        Visitor visitor = new Visitor(true);
+        user.accept(visitor);
+    }
+}
+
+class RejectSplitPayment implements Command{
+    private User user;
+    private int timestamp;
+    private ArrayNode output;
+    private ObjectMapper objectMapper;
+
+    RejectSplitPayment(User user,
+                       int timestamp,
+                       ArrayNode output,
+                       ObjectMapper objectMapper) {
+        this.user = user;
+        this.timestamp = timestamp;
+        this.output = output;
+        this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public void execute() {
+        if (user == null) {
+            ObjectNode outputNode = objectMapper.createObjectNode();
+            outputNode.put("command", "rejectSplitPayment");
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            errorNode.put("timestamp", timestamp);
+            errorNode.put("description", "User not found");
+            outputNode.set("output", errorNode);
+            outputNode.put("timestamp", timestamp);
+            output.add(outputNode);
+            return;
+        }
+        Visitor visitor = new Visitor(false);
+        user.reject(visitor);
+    }
 }
 
 

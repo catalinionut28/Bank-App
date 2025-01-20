@@ -249,24 +249,40 @@ public class Client {
                     return command;
                 case SPLIT_PAYMENT:
                     ArrayList<Account> accounts = new ArrayList<>();
+                    ArrayList<User> users = new ArrayList<>();
                     for (String iban: commandInput.getAccounts()) {
                         for (DaoObject userData: userDao.getAll()) {
                             User usr = (User) userData;
                             Account acc = (Account) usr.getAccountDao().get(iban);
                             if (acc != null) {
                                 account = acc;
+                                user = usr;
                             }
                         }
                         accounts.add(account);
+                        users.add(user);
                         account = null;
+                        user = null;
                     }
-                    command = new SplitPayment(accounts,
-                            commandInput.getAmount(),
+                    for (Account account1: accounts) {
+                        System.out.println("cont: " + account1.getIban());
+                    }
+                    ArrayList<Double> amountForUsers;
+                    if (commandInput.getSplitPaymentType().equals("custom")) {
+                        amountForUsers = new ArrayList<>(commandInput.getAmountForUsers());
+                    } else {
+                        amountForUsers = new ArrayList<>(accounts.size());
+                        for (int i = 0; i < accounts.size(); i++) {
+                            amountForUsers.add(commandInput.getAmount() / accounts.size());
+                        }
+                    }
+                    command = new SplitPayment(users,
+                            accounts, commandInput.getAmount(),
+                            commandInput.getSplitPaymentType(),
                             commandInput.getCurrency(),
                             commandInput.getTimestamp(),
-                            currencyGraph,
-                            objectMapper,
-                            output);
+                            amountForUsers, currencyGraph,
+                            objectMapper, output);
                     return command;
                 case REPORT:
                     for (DaoObject userData: userDao.getAll()) {
@@ -401,6 +417,19 @@ public class Client {
                             currencyGraph,
                             objectMapper,
                             output);
+                    return command;
+                case ACCEPT_SPLIT_PAYMENT:
+                    user = (User) userDao.get(commandInput.getEmail());
+                    command = new AcceptSplitPayment(user,
+                            commandInput.getTimestamp(), output,
+                            objectMapper);
+                    System.out.println(commandInput.getTimestamp());
+                    return command;
+                case REJECT_SPLIT_PAYMENT:
+                    user = (User) userDao.get(commandInput.getEmail());
+                    command = new RejectSplitPayment(user,
+                            commandInput.getTimestamp(), output,
+                            objectMapper);
                     return command;
 
 

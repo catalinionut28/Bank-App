@@ -5,11 +5,14 @@ import org.poo.plan.StandardPlan;
 import org.poo.plan.StudentPlan;
 import org.poo.utils.Utils;
 import org.poo.plan.ServicePlan;
+import org.poo.visitor.PaymentVisitor;
+import org.poo.visitor.UserDecision;
+import org.poo.visitor.Visitor;
 
 import java.util.ArrayList;
 
 
-public class User implements DaoObject {
+public class User implements DaoObject, UserDecision {
     private String email;
     private String firstName;
     private String lastName;
@@ -18,6 +21,9 @@ public class User implements DaoObject {
     private String occupation;
     private ServicePlan plan;
     private ArrayList<Transaction> transactions;
+    private ArrayList<PendingPayment> pendingPayments;
+
+
 
     public User(final UserInput userInput) {
         this.email = userInput.getEmail();
@@ -32,6 +38,15 @@ public class User implements DaoObject {
         } else {
             this.plan = new StandardPlan();
         }
+        this.pendingPayments = new ArrayList<>();
+    }
+
+    public ArrayList<PendingPayment> getPendingPayments() {
+        return pendingPayments;
+    }
+
+    public void setPendingPayments(ArrayList<PendingPayment> pendingPayments) {
+        this.pendingPayments = pendingPayments;
     }
 
     public ServicePlan getPlan() {
@@ -227,5 +242,15 @@ public class User implements DaoObject {
 
     public ArrayList<Transaction> getTransactions() {
         return transactions;
+    }
+
+    @Override
+    public void accept(PaymentVisitor payment) {
+        payment.visit(this);
+    }
+
+    @Override
+    public void reject(PaymentVisitor payment) {
+        payment.visit(this);
     }
 }

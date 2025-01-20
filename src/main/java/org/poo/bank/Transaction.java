@@ -1,6 +1,6 @@
 package org.poo.bank;
 
-public abstract class Transaction {
+public abstract class Transaction implements Comparable<Transaction>{
     private String description;
     private int timestamp;
     private String type;
@@ -63,6 +63,11 @@ public abstract class Transaction {
 
     public void setType(final String type) {
         this.type = type;
+    }
+
+    @Override
+    public int compareTo(Transaction another) {
+        return Integer.compare(this.timestamp, another.getTimestamp());
     }
 }
 
