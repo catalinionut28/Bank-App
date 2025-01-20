@@ -30,47 +30,154 @@ public abstract class Account implements DaoObject {
     private ClothesCashback clothesCashback;
     private ServicePlan plan;
 
+    /**
+     * Retrieves the current service plan.
+     * <p>
+     * This method returns the {@code ServicePlan} object associated with the current instance.
+     * </p>
+     *
+     * @return the {@code ServicePlan} object representing the current service plan
+     */
     public ServicePlan getPlan() {
         return plan;
     }
 
-    public void setPlan(ServicePlan plan) {
+    /**
+     * Sets the service plan.
+     * <p>
+     * This method assigns the specified {@code ServicePlan} object to the {@code plan} field,
+     * updating the service plan associated with the current instance.
+     * </p>
+     *
+     * @param plan the {@code ServicePlan} object to set as the current service plan
+     */
+    public void setPlan(final ServicePlan plan) {
         this.plan = plan;
     }
 
-    public void setCommerciantMap(HashMap<Merchant, Integer> commerciantMap) {
+    /**
+     * Sets the map of merchants and their associated transaction counts.
+     * <p>
+     * This method assigns the provided {@code HashMap} of {@code Merchant} objects and their
+     * respective transaction counts to the {@code commerciantMap} field.
+     * </p>
+     *
+     * @param commerciantMap the {@code HashMap} containing {@code Merchant} objects as keys and
+     *                       their transaction counts as values
+     */
+    public void setCommerciantMap(final HashMap<Merchant, Integer> commerciantMap) {
         this.commerciantMap = commerciantMap;
     }
 
-    public void setFoodCashback(FoodCashback foodCashback) {
+    /**
+     * Sets the food cashback.
+     * <p>
+     * This method assigns the specified {@code FoodCashback} object to the {@code foodCashback}
+     * field, updating the food cashback associated with the current instance.
+     * </p>
+     *
+     * @param foodCashback the {@code FoodCashback} object to set
+     */
+    public void setFoodCashback(final FoodCashback foodCashback) {
         this.foodCashback = foodCashback;
     }
 
-    public void setHadClothesCashback(boolean hadClothesCashback) {
+    /**
+     * Sets the flag indicating whether the clothes cashback has been applied.
+     * <p>
+     * This method updates the {@code hadClothesCashback} field to reflect whether the clothes
+     * cashback has been applied to the current instance.
+     * </p>
+     *
+     * @param hadClothesCashback {@code true}
+     * if the clothes cashback has been applied, {@code false} otherwise
+     */
+    public void setHadClothesCashback(final boolean hadClothesCashback) {
         this.hadClothesCashback = hadClothesCashback;
     }
 
-    public void setHadFoodCashback(boolean hadFoodCashback) {
+    /**
+     * Sets the flag indicating whether the food cashback has been applied.
+     * <p>
+     * This method updates the {@code hadFoodCashback} field to reflect whether the food
+     * cashback has been applied to the current instance.
+     * </p>
+     *
+     * @param hadFoodCashback {@code true}
+     * if the food cashback has been applied, {@code false} otherwise
+     */
+    public void setHadFoodCashback(final
+                                   boolean hadFoodCashback) {
         this.hadFoodCashback = hadFoodCashback;
     }
 
-    public void setClothesCashback(ClothesCashback clothesCashback) {
+    /**
+     * Sets the clothes cashback.
+     * <p>
+     * This method assigns the specified
+     * {@code ClothesCashback} object to the {@code clothesCashback}
+     * field, updating the clothes cashback associated with the current instance.
+     * </p>
+     *
+     * @param clothesCashback the
+     * {@code ClothesCashback} object to set
+     */
+    public void setClothesCashback(final ClothesCashback clothesCashback) {
         this.clothesCashback = clothesCashback;
     }
 
-    public void setHadTechCashback(boolean hadTechCashback) {
+    /**
+     * Sets the flag indicating whether the tech cashback has been applied.
+     * <p>
+     * This method updates the {@code hadTechCashback} field to reflect whether the tech
+     * cashback has been applied to the current instance.
+     * </p>
+     *
+     * @param hadTechCashback {@code true}
+     * if the tech cashback has been applied, {@code false} otherwise
+     */
+    public void setHadTechCashback(final boolean hadTechCashback) {
         this.hadTechCashback = hadTechCashback;
     }
 
-    public void setSpendingThreshold(SpendingThreshold spendingThreshold) {
+    /**
+     * Sets the spending threshold.
+     * <p>
+     * This method assigns the specified
+     * {@code SpendingThreshold} object to the {@code spendingThreshold}
+     * field, updating the spending threshold associated with the current instance.
+     * </p>
+     *
+     * @param spendingThreshold the {@code SpendingThreshold} object to set
+     */
+    public void setSpendingThreshold(final SpendingThreshold spendingThreshold) {
         this.spendingThreshold = spendingThreshold;
     }
 
-    public void setSpendingTotal(double spendingTotal) {
+    /**
+     * Sets the total spending amount.
+     * <p>
+     * This method updates the {@code spendingTotal} field to reflect the total spending amount
+     * associated with the current instance.
+     * </p>
+     *
+     * @param spendingTotal the total spending amount to set
+     */
+    public void setSpendingTotal(final double spendingTotal) {
         this.spendingTotal = spendingTotal;
     }
 
-    public void setTechCashback(TechCashback techCashback) {
+    /**
+     * Sets the tech cashback.
+     * <p>
+     * This method assigns the specified {@code TechCashback}
+     * object to the {@code techCashback}
+     * field, updating the tech cashback associated with the current instance.
+     * </p>
+     *
+     * @param techCashback the {@code TechCashback} object to set
+     */
+    public void setTechCashback(final TechCashback techCashback) {
         this.techCashback = techCashback;
     }
 
@@ -297,7 +404,7 @@ public abstract class Account implements DaoObject {
      */
 
     public void payOnline(final double amount, final String cardNumber, final Merchant commerciant,
-                          double ronAmount) {
+                          final double ronAmount) {
         balance -= amount;
         Card card = getCard(cardNumber);
         if (card.isOneTimeCard()) {
@@ -308,7 +415,18 @@ public abstract class Account implements DaoObject {
         createCashback(commerciant, amount, ronAmount);
     }
 
-    private void getCashback(String commerciantType, double amount) {
+    /**
+     * Applies cashback based on the merchant type and the specified amount.
+     * <p>
+     * This method checks the merchant type and applies the corresponding cashback strategy
+     * (Food, Tech, or Clothes) if available. After performing the cashback, the associated
+     * cashback object is reset to {@code null}.
+     * </p>
+     *
+     * @param commerciantType the type of the merchant (e.g., "Food", "Tech", "Clothes")
+     * @param amount the amount for which cashback is to be applied
+     */
+    private void getCashback(final String commerciantType, final double amount) {
         CashbackContext cashbackContext = new CashbackContext(null);
         switch (commerciantType) {
             case "Food":
@@ -337,8 +455,25 @@ public abstract class Account implements DaoObject {
         }
 
     }
-
-    private void createCashback(final Merchant commerciant, double amount, double ronAmount) {
+    /**
+     * Creates a cashback for a merchant based on the specified strategy.
+     * <p>
+     * This method handles two types of
+     * cashback strategies: "nrOfTransactions" and "spendingThreshold".
+     * For "nrOfTransactions", cashback
+     * is granted based on the number of transactions made at
+     * specific merchant types
+     * (e.g., Food, Clothes, Tech). For "spendingThreshold", cashback is
+     * granted once a spending threshold is met, based on the total spending amount.
+     * </p>
+     *
+     * @param commerciant the {@code Merchant} providing cashback offers
+     * @param amount the amount to be used for cashback calculation
+     * @param ronAmount the amount in RON for the cashback calculation
+     */
+    private void createCashback(final Merchant commerciant,
+                                final double amount,
+                                final double ronAmount) {
         switch (commerciant.getCashbackStrategy()) {
             case "nrOfTransactions":
                 if (!commerciantMap.containsKey(commerciant)) {
@@ -393,6 +528,8 @@ public abstract class Account implements DaoObject {
                     addFunds(cashbackContext.performCashback(amount));
                 }
                 break;
+            default:
+                break;
         }
     }
 
@@ -432,7 +569,6 @@ public abstract class Account implements DaoObject {
                           final CurrencyGraph exchangeGraph,
                           final int timestamp,
                           final String description) {
-        //TODO: Add sendMoney for a merchant
         this.balance -= amount;
         String formattedAmount = String.valueOf(amount)
                                 + " " + currency;
@@ -495,11 +631,37 @@ public abstract class Account implements DaoObject {
             receiver.receiveMoney(amount);
         }
     }
-    public void payUpgradeFee(double feeConverted) {
+    /**
+     * Pays the upgrade fee by deducting the specified amount from the balance.
+     * <p>
+     * This method subtracts the given {@code feeConverted} from the current balance,
+     * effectively paying the upgrade fee.
+     * </p>
+     *
+     * @param feeConverted the fee amount to be deducted from the balance
+     */
+    public void payUpgradeFee(final double feeConverted) {
         balance -= feeConverted;
     }
-
-    public void withdrawCash(double amount, double ronAmount, Card card) {
+    /**
+     * Withdraws cash from the account, applying the appropriate commission based on the plan.
+     * <p>
+     * This method checks the currency
+     * and deducts the specified {@code amount} (or {@code ronAmount})
+     * from the balance.
+     * It also applies the commission based on the user's plan type.
+     * The commission is calculated
+     * using different methods depending on whether the plan is
+     * "standard" or "silver".
+     * </p>
+     *
+     * @param amount the amount to withdraw in the selected currency
+     * @param ronAmount the equivalent amount in RON if the currency is "RON"
+     * @param card the {@code Card} object associated with the transaction
+     */
+    public void withdrawCash(double amount,
+                             final double ronAmount,
+                             final Card card) {
         if (currency.equals("RON")) {
             balance -= ronAmount;
             amount = ronAmount;

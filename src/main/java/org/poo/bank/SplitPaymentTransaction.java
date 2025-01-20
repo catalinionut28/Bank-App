@@ -38,10 +38,26 @@ public class SplitPaymentTransaction extends Transaction {
         return amount;
     }
 
+    /**
+     * Retrieves the split type.
+     * <p>
+     * This method returns the {@code splitType} value associated with the current instance.
+     * </p>
+     *
+     * @return the split type
+     */
     public String getSplitType() {
         return splitType;
     }
 
+    /**
+     * Retrieves the list of amounts for users.
+     * <p>
+     * This method returns an {@code ArrayList} containing the amounts associated with each user.
+     * </p>
+     *
+     * @return an {@code ArrayList<Double>} representing the amounts for users
+     */
     public ArrayList<Double> getAmountForUsers() {
         return amountForUsers;
     }

@@ -61,7 +61,7 @@ public final class Utils {
         cardRandom = new Random(CARD_SEED);
     }
 
-    public static int calculateAge(String birthDate) {
+    public static int calculateAge(final String birthDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(birthDate, formatter);
         LocalDate today = LocalDate.now();

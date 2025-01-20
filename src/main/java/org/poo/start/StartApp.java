@@ -14,7 +14,13 @@ public final class StartApp {
     private StartApp() {
 
     }
-
+    /**
+     * Returns the singleton instance of the {@code StartApp} class.
+     * This method ensures that only one instance of the {@code StartApp} class is created
+     * (following the Singleton design pattern). If an instance does not already exist,
+     * it creates one; otherwise, it returns the existing instance.
+     * @return the singleton instance of {@code StartApp}
+     */
     public static StartApp getInstance() {
         if (instance == null) {
             instance = new StartApp();

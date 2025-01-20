@@ -15,7 +15,7 @@ public class Merchant {
     @Getter
     private final String cashbackStrategy;
 
-    public Merchant(CommerciantInput commerciantInput) {
+    public Merchant(final CommerciantInput commerciantInput) {
         this.id = commerciantInput.getId();
         this.name = commerciantInput.getCommerciant();
         this.type = commerciantInput.getType();

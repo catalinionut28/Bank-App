@@ -9,11 +9,18 @@ public class StudentPlan extends ServicePlan {
         type = "student";
     }
 
-    public double upgrade(String type) {
-        if (type.equals("silver")) {
+    /**
+     * Upgrades the service plan to the specified type.
+     *
+     * @param newType The type to upgrade to
+     *             (e.g., "silver", "gold").
+     * @return     The upgrade fee for the new plan type.
+     */
+    public double upgrade(final String newType) {
+        if (newType.equals("silver")) {
             return silverFee;
         }
-        if (type.equals("gold")) {
+        if (newType.equals("gold")) {
             return goldFee;
         }
         return 0;

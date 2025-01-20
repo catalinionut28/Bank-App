@@ -14,10 +14,28 @@ public class InterestRateIncome extends Transaction {
         this.setDescription("Interest rate income");
     }
 
+    /**
+     * Retrieves the amount.
+     * <p>
+     * This method returns the {@code amount}
+     * value associated with the current instance.
+     * </p>
+     *
+     * @return the amount
+     */
     public double getAmount() {
         return amount;
     }
 
+    /**
+     * Retrieves the currency.
+     * <p>
+     * This method returns the {@code currency}
+     * value associated with the current instance.
+     * </p>
+     *
+     * @return the currency
+     */
     public String getCurrency() {
         return currency;
     }

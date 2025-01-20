@@ -14,10 +14,28 @@ public class UpgradePlanTransaction extends Transaction {
         this.newPlanType = newPlanType;
     }
 
+    /**
+     * Retrieves the new plan type.
+     * <p>
+     * This method returns the
+     * {@code newPlanType} value associated with the current instance.
+     * </p>
+     *
+     * @return the new plan type
+     */
     public String getNewPlanType() {
         return newPlanType;
     }
 
+    /**
+     * Retrieves the account IBAN.
+     * <p>
+     * This method returns the
+     * {@code accountIban} value associated with the current instance.
+     * </p>
+     *
+     * @return the account IBAN
+     */
     public String getAccountIban() {
         return accountIban;
     }

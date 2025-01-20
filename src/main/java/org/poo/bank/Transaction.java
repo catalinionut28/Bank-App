@@ -1,6 +1,6 @@
 package org.poo.bank;
 
-public abstract class Transaction implements Comparable<Transaction>{
+public abstract class Transaction implements Comparable<Transaction> {
     private String description;
     private int timestamp;
     private String type;
@@ -65,8 +65,19 @@ public abstract class Transaction implements Comparable<Transaction>{
         this.type = type;
     }
 
+    /**
+     * Compares this transaction with another transaction based on their timestamps.
+     * <p>
+     * This method compares the {@code timestamp} of the current transaction with the
+     * {@code timestamp} of the specified transaction using {@code Integer.compare}.
+     * </p>
+     *
+     * @param another the {@code Transaction} to be compared
+     * @return a negative integer, zero, or a positive integer if this transaction's timestamp
+     *         is less than, equal to, or greater than the specified transaction's timestamp
+     */
     @Override
-    public int compareTo(Transaction another) {
+    public int compareTo(final Transaction another) {
         return Integer.compare(this.timestamp, another.getTimestamp());
     }
 }

@@ -5,15 +5,40 @@ public abstract class ServicePlan {
     protected double commission;
 
 
+    /**
+     * Gets the type of the service plan.
+     *
+     * @return The type of the service plan.
+     */
     public String getType() {
         return type;
     }
+
+    /**
+     * Gets the commission rate of the service plan.
+     *
+     * @return The commission rate.
+     */
     public double getCommission() {
         return commission;
     }
-    public abstract double upgrade(String type);
 
-    public int compareTo(ServicePlan servicePlan) {
+    /**
+     * Upgrades the service plan based on the given type.
+     *
+     * @param type The type to upgrade to (e.g., gold, silver).
+     * @return     The upgrade fee for the new plan.
+     */
+    public abstract double upgrade(final String type);
+
+    /**
+     * Compares the current service plan with another one.
+     *
+     * @param servicePlan The service plan to compare with.
+     * @return            A positive number if this plan is higher,
+     *                    negative if lower, or 0 if equal.
+     */
+    public int compareTo(final ServicePlan servicePlan) {
         if (this.type.equals("gold")) {
             if (!servicePlan.getType().equals("gold")) {
                 return 1;
@@ -38,7 +63,13 @@ public abstract class ServicePlan {
         return 0;
     }
 
-    public static ServicePlan createPlan(String type) {
+    /**
+     * Creates a service plan based on the given type.
+     *
+     * @param type The type of plan to create (e.g., student, silver).
+     * @return     A new instance of the corresponding service plan.
+     */
+    public static ServicePlan createPlan(final String type) {
         switch (type) {
             case "student":
                 return new StudentPlan();

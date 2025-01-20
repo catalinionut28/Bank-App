@@ -75,6 +75,20 @@ public class SavingsAccount extends Account {
         this.report = report;
     }
 
+    /**
+     * Withdraws a specified amount from
+     * the current account and transfers it to another account.
+     * <p>
+     * This method reduces the balance of
+     * the current account by the specified {@code amount}
+     * and adds the same amount to the {@code ClassicAccount} provided.
+     * </p>
+     *
+     * @param account the {@code ClassicAccount}
+     * to which the amount is transferred
+     * @param amount the amount to withdraw from
+     * the current account and transfer to the provided account
+     */
     public void withdraw(final ClassicAccount account,
                          final double amount) {
         this.setBalance(this.getBalance() - amount);

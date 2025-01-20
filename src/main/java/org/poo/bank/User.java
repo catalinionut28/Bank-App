@@ -7,7 +7,6 @@ import org.poo.utils.Utils;
 import org.poo.plan.ServicePlan;
 import org.poo.visitor.PaymentVisitor;
 import org.poo.visitor.UserDecision;
-import org.poo.visitor.Visitor;
 
 import java.util.ArrayList;
 
@@ -41,37 +40,123 @@ public class User implements DaoObject, UserDecision {
         this.pendingPayments = new ArrayList<>();
     }
 
+    /**
+     * Retrieves the list of pending payments.
+     * <p>
+     * This method returns an {@code ArrayList}
+     * containing all {@code PendingPayment} objects
+     * that are currently marked as pending.
+     * </p>
+     *
+     * @return an {@code ArrayList} of
+     * {@code PendingPayment} objects representing the pending payments
+     */
     public ArrayList<PendingPayment> getPendingPayments() {
         return pendingPayments;
     }
 
-    public void setPendingPayments(ArrayList<PendingPayment> pendingPayments) {
+    /**
+     * Sets the list of pending payments.
+     * <p>
+     * This method assigns the specified
+     * {@code ArrayList} of {@code PendingPayment} objects
+     * to the {@code pendingPayments} field,
+     * updating the list of payments that are currently pending.
+     * </p>
+     *
+     * @param pendingPayments an {@code ArrayList}
+     * of {@code PendingPayment} objects to set as the pending payments
+     */
+    public void setPendingPayments(final
+                                   ArrayList<PendingPayment> pendingPayments) {
         this.pendingPayments = pendingPayments;
     }
 
+    /**
+     * Retrieves the current service plan.
+     * <p>
+     * This method returns the {@code ServicePlan}
+     * object associated with the current instance.
+     * The service plan represents the details of the subscribed or assigned plan.
+     * </p>
+     *
+     * @return the {@code ServicePlan} object representing the current service plan
+     */
     public ServicePlan getPlan() {
         return plan;
     }
 
-    public void setPlan(ServicePlan plan) {
+
+    /**
+     * Sets the service plan.
+     * <p>
+     * This method assigns the specified
+     * {@code ServicePlan} object to the {@code plan} field,
+     * updating the service plan associated with the current instance.
+     * </p>
+     *
+     * @param plan the {@code ServicePlan} object to set as the current service plan
+     */
+    public void setPlan(final ServicePlan plan) {
         this.plan = plan;
     }
 
 
-
+    /**
+     * Retrieves the occupation.
+     * <p>
+     * This method returns the {@code occupation}
+     * associated with the current instance.
+     * The occupation represents the job, profession, or role of the individual.
+     * </p>
+     *
+     * @return a {@code String} representing the occupation
+     */
     public String getOccupation() {
         return occupation;
     }
 
+    /**
+     * Retrieves the age.
+     * <p>
+     * This method returns the {@code age} of
+     * the individual associated with the current instance.
+     * The age is represented as an integer value.
+     * </p>
+     *
+     * @return an {@code int} representing the age
+     */
     public int getAge() {
         return age;
     }
 
-    public void setOccupation(String occupation) {
+    /**
+     * Sets the occupation.
+     * <p>
+     * This method assigns the specified {@code String}
+     * value to the {@code occupation} field,
+     * updating the occupation of the
+     * individual associated with the current instance.
+     * </p>
+     *
+     * @param occupation a {@code String} representing the occupation to be set
+     */
+    public void setOccupation(final String occupation) {
         this.occupation = occupation;
     }
 
-    public void setAge(int age) {
+    /**
+     * Sets the age.
+     * <p>
+     * This method assigns the specified
+     * {@code int} value to the {@code age} field,
+     * updating the age of the individual
+     * associated with the current instance.
+     * </p>
+     *
+     * @param age an {@code int} representing the age to be set
+     */
+    public void setAge(final int age) {
         this.age = age;
     }
 
@@ -156,7 +241,8 @@ public class User implements DaoObject, UserDecision {
     }
 
     /**
-     * Creates a classic account with the specified currency and records its creation timestamp.
+     * Creates a classic account with the
+     * specified currency and records its creation timestamp.
      *
      * @param currency a String representing the account currency.
      * @param timestamp an integer representing the account creation timestamp.
@@ -216,7 +302,13 @@ public class User implements DaoObject, UserDecision {
             return;
         }
     }
-
+    /**
+     * Upgrades the service plan for all accounts.
+     * <p>
+     * This method iterates over all accounts from the {@code accountDao} and updates each
+     * account's plan to the current service plan ({@code plan}).
+     * </p>
+     */
     public void upgradePlan() {
         for (DaoObject accData: accountDao.getAll()) {
             Account account = (Account) accData;
@@ -244,13 +336,30 @@ public class User implements DaoObject, UserDecision {
         return transactions;
     }
 
+    /**
+     * Accepts a payment visitor to perform actions based on the current payment state.
+     * <p>
+     * This method calls the {@code visit} method of the provided {@code PaymentVisitor},
+     * passing the current object as the argument for processing.
+     * </p>
+     *
+     * @param payment the {@code PaymentVisitor} that will perform actions on the current payment
+     */
     @Override
-    public void accept(PaymentVisitor payment) {
+    public void accept(final PaymentVisitor payment) {
         payment.visit(this);
     }
-
+    /**
+     * Rejects a payment visitor to handle rejection actions for the current payment state.
+     * <p>
+     * This method calls the {@code visit} method of the provided {@code PaymentVisitor},
+     * passing the current object as the argument for processing.
+     * </p>
+     *
+     * @param payment the {@code PaymentVisitor} that will perform rejection actions on the payment
+     */
     @Override
-    public void reject(PaymentVisitor payment) {
+    public void reject(final PaymentVisitor payment) {
         payment.visit(this);
     }
 }
