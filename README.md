@@ -1,34 +1,58 @@
-# Project Assignment POO  - J. POO Morgan - Phase One
+# J. POO Morgan - Etapa 2
 
-![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2dibmZueTVmbGNoY2kxcDlkdHpsd3hvNDA5ZTRleHcwMzRxM2x0OSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lJEGgG5ajs4zC/giphy.gif)
 
-#### Assignment Link: [https://ocw.cs.pub.ro/courses/poo-ca-cd/teme/2024/proiect-etapa2](https://ocw.cs.pub.ro/courses/poo-ca-cd/teme/2024/proiect-etapa2)
+## Noi modificari:
+* Am adaugat urmatoarele pachete:
+****
+* plan: unde se afla toate tipurile de service plan-uri
+* visitor: visitor pattern pentru split payment
+* commerciants: care contine cashback strategy-urile si clasa Merchant
 
-## Skel Structure
 
-* src/
-    * checker/ - checker files
-    * fileio/ - contains classes used to read data from the json files
-    * main/
-        * Main - the Main class runs the checker on your implementation. Add the entry point to your implementation in it. Run Main to test your implementation from the IDE or from command line.
-        * Test - run the main method from Test class with the name of the input file from the command line and the result will be written
-          to the out.txt file. Thus, you can compare this result with ref.
-* input/ - contains the tests in JSON format
-* ref/ - contains all reference output for the tests in JSON format
+****
+* Am modificat urmatoarele:
+****
+* Am adaugat clase noi pentru tranzactii, cum ar fi: InterestRateIncome, SavingsWithdrawn,
+CashTransaction etc.
+* Am adaugat o clasa noua pentru split payment: MultiplePayment, care va fi folosita in PendingPayment
+* Am adaugat clase pentru noile comenzi implementate
+* Am modificat clasa StartApp pentru intr-o clasa care foloseste DP-ul Singleton
+* Am modificat in Utils, adaugand o clasa noua care calculeaza varsta unui utilizator,
+primind o data.
+* La recomandarea corectorului etapei 1, am scos toate clasele care erau in fisierul command.Command
+* Am modifcat metode precum payOnline si sendMoney din clasa abstracta Account
+* Am modificat clasa User, care are mai multe functionalitati si campuri, precum: age si occupation, dar
+si metode precum upgradePlan, care upgradeaza fiecarui cont planul asociat.
+* Am modificat clasa SplitPayment din command, care este total diferita, si se foloseste de
+DP-ul Visitor implementat.
 
-## Tests
+****
 
-Tests Basic 1 - 10: Infrastructure \
-Tests Functional 11 - 17: Advanced \
-Tests Flow 18 - 20: Large Input
+Proiectul nu a fost in totalitate terminat, fiind nevoit sa implementez si
+Business Account, si alte erori si feature-uri.
 
-1. test01_user_updates - 2p
-2. test02_upgrade_plan - 2p
-3. test04_commisions - 2p
-4. test05_savings_update - 2p
-5. test06_cashback - 2p
-6. test07_simple_split_payment - 2p
-7. test08_advanced_split_payment - 2p
-8. test09_business_account_simple - 2p
-9. test10_business_account_limits - 2p
+## Design Patterns
+
+Pe langa design pattern-urile folosite la etapa anterioara (DAO, Command),
+am implementat urmatoarele design pattern-uri:
+
+#### Strategy:
+ * folosit pentru strategia de cashback pe care a trebuit sa o implementez
+ * se imparte in alte doua tipuri de strategii: NrOfTransactions si SpendingThreshold
+ * fiecare tip de cashback are o clasa asociata 
+ * contine si CashbackContext care primeste ca parametru un cashbackStrategy,
+si il calculeaza.
+
+#### Visitor:
+* folosit pentru comanda split payment.
+* visitorul viziteaza un utilizator, acesta fiind nevoit sa accepte sau sa refuze
+primul payment din coada.
+* contine interfata UserDecision, pe care o implementeaza clasa User, unde acesta accepta sau refuza
+visitorul (prima plata).
+* contine interfata PaymentVisitor, care defineste metoda visit(), precizata anterior.
+
+
+#### Singleton:
+* folosit pentru pornirea "aplicatiei".
+* mi s-a parut mult mai elegant sa folosesc singleton decat o metoda statica.
 

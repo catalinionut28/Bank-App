@@ -264,9 +264,6 @@ public class Client {
                         account = null;
                         user = null;
                     }
-                    for (Account account1: accounts) {
-                        System.out.println("cont: " + account1.getIban());
-                    }
                     ArrayList<Double> amountForUsers;
                     if (commandInput.getSplitPaymentType().equals("custom")) {
                         amountForUsers = new ArrayList<>(commandInput.getAmountForUsers());
@@ -345,7 +342,6 @@ public class Client {
                             }
                         }
                     }
-                    System.out.println("abc");
                     command = new CashWithdrawal(user,
                             account,
                             foundCard,
