@@ -1,0 +1,53 @@
+commit f521ee2ce54cfa6e016ca4e602e5537992e4af0a
+Author: Vasile Catalin-Ionut <catalin.vasile2812@stud.acs.upb.ro>
+Date:   Tue Jan 21 00:23:50 2025 +0200
+
+    Added README
+
+commit 18964b59c375984843d6187c6a0a57a12ae40092
+Author: Vasile Catalin-Ionut <catalin.vasile2812@stud.acs.upb.ro>
+Date:   Mon Jan 20 23:57:41 2025 +0200
+
+    Finished the checkstyle
+
+commit db9e374a074ea85c3671cf852af56b499503765e
+Author: Vasile Catalin-Ionut <catalin.vasile2812@stud.acs.upb.ro>
+Date:   Mon Jan 20 21:43:00 2025 +0200
+
+    Finished implementing split payment
+
+commit ab2f76b015c96dde913f3a3460b130852ce84446
+Author: catalinionut28 <catalinvasile28@yahoo.com>
+Date:   Thu Jan 16 00:52:10 2025 +0200
+
+    Added updates for savings account
+
+commit 3eb4360af5733b8ab3a8fef135a33e81694081c8
+Author: Catalin <catalin.vasile2812@stud.acs.upb.ro>
+Date:   Wed Jan 15 23:26:04 2025 +0200
+
+    Finished implementing cashback for payOnline and plan upgrades
+
+commit 7ababdd0d1f4ac89475218acd6b65d2318825c5f
+Author: Catalin <catalin.vasile2812@stud.acs.upb.ro>
+Date:   Sat Jan 11 01:39:49 2025 +0200
+
+    Added service plan
+
+commit c25da22929b0360311dfc13927605c0b7d5f1dde
+Author: Catalin <catalin.vasile2812@stud.acs.upb.ro>
+Date:   Wed Jan 8 21:29:52 2025 +0200
+
+    Added cashback for payOnline
+
+commit 53103e7cd04c51174ecaa4c9cc16812ea8f33414
+Author: Catalin <catalin.vasile2812@stud.acs.upb.ro>
+Date:   Sun Jan 5 23:14:22 2025 +0200
+
+    Added age and occupation for the user
+
+commit 0fb57553f7557e18ab56cb05d4142a51b244e407
+Author: catalinionut28 <catalinvasile28@yahoo.com>
+Date:   Sat Jan 4 22:47:14 2025 +0200
+
+    Added the previous version's features

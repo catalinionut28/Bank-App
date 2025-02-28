@@ -6,27 +6,21 @@ public class SplitPaymentTransaction extends Transaction {
     private final String currency;
     private final double amount;
     private ArrayList<String> involvedAccounts;
-    private ArrayList<Double> amountForUsers;
     private final String error;
-    private final String splitType;
 
     public SplitPaymentTransaction(final int timestamp,
                                    final String description,
-                                   final String splitType,
                                    final String currency,
                                    final double amount,
                                    final ArrayList<String> involvedAccounts,
-                                   final ArrayList<Double> amountForUsers,
                                    final String error) {
         this.setTimestamp(timestamp);
         this.setDescription(description);
         this.setType("SplitPayment");
         this.currency = currency;
-        this.splitType = splitType;
         this.amount = amount;
         this.involvedAccounts = involvedAccounts;
         this.error = error;
-        this.amountForUsers = amountForUsers;
     }
 
     /**
@@ -36,30 +30,6 @@ public class SplitPaymentTransaction extends Transaction {
      */
     public double getAmount() {
         return amount;
-    }
-
-    /**
-     * Retrieves the split type.
-     * <p>
-     * This method returns the {@code splitType} value associated with the current instance.
-     * </p>
-     *
-     * @return the split type
-     */
-    public String getSplitType() {
-        return splitType;
-    }
-
-    /**
-     * Retrieves the list of amounts for users.
-     * <p>
-     * This method returns an {@code ArrayList} containing the amounts associated with each user.
-     * </p>
-     *
-     * @return an {@code ArrayList<Double>} representing the amounts for users
-     */
-    public ArrayList<Double> getAmountForUsers() {
-        return amountForUsers;
     }
 
     /**

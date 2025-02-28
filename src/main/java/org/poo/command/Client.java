@@ -414,21 +414,6 @@ public class Client {
                             objectMapper,
                             output);
                     return command;
-                case ACCEPT_SPLIT_PAYMENT:
-                    user = (User) userDao.get(commandInput.getEmail());
-                    command = new AcceptSplitPayment(user,
-                            commandInput.getTimestamp(), output,
-                            objectMapper);
-                    System.out.println(commandInput.getTimestamp());
-                    return command;
-                case REJECT_SPLIT_PAYMENT:
-                    user = (User) userDao.get(commandInput.getEmail());
-                    command = new RejectSplitPayment(user,
-                            commandInput.getTimestamp(), output,
-                            objectMapper);
-                    return command;
-
-
                 default:
                     break;
             }

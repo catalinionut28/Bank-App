@@ -98,26 +98,13 @@ class PrintTransactions implements Command {
                     transactionNode.put("timestamp", splitPayment.getTimestamp());
                     transactionNode.put("description", splitPayment.getDescription());
                     transactionNode.put("currency", splitPayment.getCurrency());
-                    transactionNode.put("splitPaymentType", splitPayment.getSplitType());
-                    ArrayNode amounts = objectMapper.createArrayNode();
-                    for (Double amount : splitPayment.getAmountForUsers()) {
-                        amounts.add(amount);
-                    }
-                    if (splitPayment.getSplitType().equals("custom")) {
-                        transactionNode.set("amountForUsers", amounts);
-                    } else {
-                        transactionNode.put("amount", splitPayment
-                                .getAmountForUsers()
-                                .get(0));
-                    }
+                    transactionNode.put("amount", splitPayment.getAmount());
                     if (splitPayment.getError() != null) {
                         transactionNode.put("error", splitPayment.getError());
                     }
                     ArrayNode involvedAccountsArray = objectMapper.createArrayNode();
-                    for (int i = 0;
-                         i < splitPayment
-                                 .getInvolvedAccounts()
-                                 .size(); i++) {
+                    for (int i = splitPayment.getInvolvedAccounts().size() - 1;
+                         i >= 0; i--) {
                         involvedAccountsArray.add(splitPayment
                                 .getInvolvedAccounts()
                                 .get(i));

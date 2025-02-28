@@ -3,7 +3,7 @@ package org.poo.command;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.bank.Account;
-import org.poo.bank.MultiplePayment;
+import org.poo.bank.SplitPaymentTransaction;
 import org.poo.bank.PendingPayment;
 import org.poo.bank.User;
 import org.poo.graph.CurrencyGraph;
@@ -60,22 +60,58 @@ class SplitPayment implements Command {
      * </p>
      */
     public void execute() {
-        MultiplePayment splitPayment = new MultiplePayment(amount,
-                currency, timestamp, type, amounts, users);
-        for (int i = 0; i < amounts.size(); i++) {
-            double convertedAmount = graph
-                    .exchange(new Node(currency, 1),
-                    new Node(accounts.get(i)
-                            .getCurrency(), 1),
-                            amounts.get(i));
-            PendingPayment payment =
-                    new PendingPayment(convertedAmount,
-                            accounts.get(i).getCurrency(),
-                    timestamp, accounts.get(i), splitPayment);
-            splitPayment.addPayment(payment);
-            users.get(i)
-                    .getPendingPayments()
-                    .add(payment);
+        double[] amountsExchanged = new double[accounts.size()];
+        ArrayList<String> involvedAccounts = new ArrayList<>();
+        String errorMessage = null;
+        String error = null;
+        for (int i = accounts.size() - 1; i >= 0; i--) {
+            Account account = accounts.get(i);
+            if (account == null) {
+                return;
+            }
+            amountsExchanged[i] = graph.exchange(new Node(currency, 1),
+                    new Node(account.getCurrency(), 1),
+                    amount / accounts.size());
+            if (account.getBalance() < amountsExchanged[i]) {
+                errorMessage = "Account "
+                        + account.getIban()
+                        + " has insufficient funds "
+                        + "for a split payment.";
+                if (error == null) {
+                    error = errorMessage;
+                }
+            }
+            involvedAccounts.add(account.getIban());
+        }
+        String description = "Split payment of "
+                + String.format("%.2f", amount)
+                + " "
+                + currency;
+        if (error != null) {
+            SplitPaymentTransaction err =
+                    new SplitPaymentTransaction(timestamp,
+                            description, currency,
+                            amount / accounts.size(),
+                            involvedAccounts, error);
+            for (Account account: accounts) {
+                account.getUserTransactions().add(err);
+                account.getTransactionHistory().add(err);
+            }
+            return;
+        }
+        for (int i = 0; i < accounts.size(); i++) {
+            accounts.get(i).splitPay(amountsExchanged[i]);
+            SplitPaymentTransaction transaction = new SplitPaymentTransaction(timestamp,
+                    description, currency,
+                    amount / accounts.size(),
+                    involvedAccounts, error);
+            accounts.get(i)
+                    .getUserTransactions()
+                    .add(transaction);
+            accounts.get(i)
+                    .getTransactionHistory()
+                    .add(transaction);
         }
     }
 }
+

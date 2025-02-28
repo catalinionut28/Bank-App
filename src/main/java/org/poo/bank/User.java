@@ -5,13 +5,10 @@ import org.poo.plan.StandardPlan;
 import org.poo.plan.StudentPlan;
 import org.poo.utils.Utils;
 import org.poo.plan.ServicePlan;
-import org.poo.visitor.PaymentVisitor;
-import org.poo.visitor.UserDecision;
-
 import java.util.ArrayList;
 
 
-public class User implements DaoObject, UserDecision {
+public class User implements DaoObject {
     private String email;
     private String firstName;
     private String lastName;
@@ -20,7 +17,6 @@ public class User implements DaoObject, UserDecision {
     private String occupation;
     private ServicePlan plan;
     private ArrayList<Transaction> transactions;
-    private ArrayList<PendingPayment> pendingPayments;
 
 
 
@@ -37,40 +33,9 @@ public class User implements DaoObject, UserDecision {
         } else {
             this.plan = new StandardPlan();
         }
-        this.pendingPayments = new ArrayList<>();
     }
 
-    /**
-     * Retrieves the list of pending payments.
-     * <p>
-     * This method returns an {@code ArrayList}
-     * containing all {@code PendingPayment} objects
-     * that are currently marked as pending.
-     * </p>
-     *
-     * @return an {@code ArrayList} of
-     * {@code PendingPayment} objects representing the pending payments
-     */
-    public ArrayList<PendingPayment> getPendingPayments() {
-        return pendingPayments;
-    }
 
-    /**
-     * Sets the list of pending payments.
-     * <p>
-     * This method assigns the specified
-     * {@code ArrayList} of {@code PendingPayment} objects
-     * to the {@code pendingPayments} field,
-     * updating the list of payments that are currently pending.
-     * </p>
-     *
-     * @param pendingPayments an {@code ArrayList}
-     * of {@code PendingPayment} objects to set as the pending payments
-     */
-    public void setPendingPayments(final
-                                   ArrayList<PendingPayment> pendingPayments) {
-        this.pendingPayments = pendingPayments;
-    }
 
     /**
      * Retrieves the current service plan.
@@ -336,30 +301,4 @@ public class User implements DaoObject, UserDecision {
         return transactions;
     }
 
-    /**
-     * Accepts a payment visitor to perform actions based on the current payment state.
-     * <p>
-     * This method calls the {@code visit} method of the provided {@code PaymentVisitor},
-     * passing the current object as the argument for processing.
-     * </p>
-     *
-     * @param payment the {@code PaymentVisitor} that will perform actions on the current payment
-     */
-    @Override
-    public void accept(final PaymentVisitor payment) {
-        payment.visit(this);
-    }
-    /**
-     * Rejects a payment visitor to handle rejection actions for the current payment state.
-     * <p>
-     * This method calls the {@code visit} method of the provided {@code PaymentVisitor},
-     * passing the current object as the argument for processing.
-     * </p>
-     *
-     * @param payment the {@code PaymentVisitor} that will perform rejection actions on the payment
-     */
-    @Override
-    public void reject(final PaymentVisitor payment) {
-        payment.visit(this);
-    }
 }
