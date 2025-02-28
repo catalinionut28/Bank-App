@@ -1,4 +1,4 @@
-# Bank-App-Part-I
+# Bank-App
 
 A minimalistic banking system with features such as:
 
@@ -25,7 +25,7 @@ constructs the appropriate command using a switch statement.
 - Implemented the Strategy Design Pattern for creating each type of cashback.
 
 ## Project Structure
-- The project is structured into 8 packages:
+- The project is structured into 9 packages:
 1) bank:
     - Contains the Account class and its subclasses (ClassicAccount
    and SavingsAccount).
